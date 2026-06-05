@@ -11,54 +11,24 @@ if (fs.existsSync(ENV_FILE)) {
     process.loadEnvFile(ENV_FILE);
 }
 
-const CN_BB_URL = null;
-const CN_FE_URL = null;
-
 const BLITZ_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/blitz.json';
 const RAID_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/raid.json';
 const CHARACTERID_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/characterid.json';
-const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/EN/bin/StarTowerBuildRank.json';
-const POTENTIAL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/EN/bin/CharPotential.json';
+
+const Activity_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/Activity.json';
+const POTENTIAL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/CharPotential.json';
+const SCOREBOSSCONTROL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/ScoreBossControl.json';
+const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/StarTowerBuildRank.json';
 
 const VERSION = '727.727.727.7272727';
 
 const SDK_URL_CN = 'https://sdk-api.yostar.cn';
-// const SDK_URL_EN = 'https://en-sdk-api.yostarplat.com';
-// const SDK_URL_JP = 'https://jp-sdk-api.yostarplat.com';
-// const SDK_URL_KR = 'https://jp-sdk-api.yostarplat.com';
-// const SDK_URL_TW = 'https://jp-sdk-api.yostarplat.com';
 const SERVER_URL_CN = 'https://nova.yostar.cn';
-// const SERVER_URL_EN = 'https://nova.stellasora.global';
-// const SERVER_URL_JP = 'https://nova.stellasora.jp';
-// const SERVER_URL_KR = 'https://nova.stellasora.kr';
-// const SERVER_URL_TW = 'https://nova.stargazer-games.com';
 const SERVER_GARBLE_KEY_CN = Buffer.from('QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV', 'ascii');
-// const SERVER_GARBLE_KEY_EN = Buffer.from('xNdVF^XTa6T3HCUATMQ@sKMLzAw&%L!3', 'ascii');
-// const SERVER_GARBLE_KEY_JP = Buffer.from('yX5Gt64PVvVH6$qwBXaPJC*LZKoK5mYh', 'ascii');
-// const SERVER_GARBLE_KEY_KR = Buffer.from('25hdume9H#*6hHn@d9hSF7tekTwN#JYj', 'ascii');
-// const SERVER_GARBLE_KEY_TW = Buffer.from('N&mfco452ZH5!nE3s&o5uxB57UGPENVo', 'ascii');
 
-// const DEVICE = crypto.randomBytes(20).toString('hex');
 const DEVICE_CN = process.env.DEVICE_CN;
 const TOKEN_CN = process.env.TOKEN_CN;
 const UID_CN = process.env.UID_CN;
-
-// const DEVICE = process.env.DEVICE;
-// const EMAIL_EN = process.env.EMAIL_EN;
-// const EMAIL_JP = process.env.EMAIL_JP;
-// const EMAIL_KR = process.env.EMAIL_KR;
-// const EMAIL_TW = process.env.EMAIL_TW;
-// const TOKEN_EN = process.env.TOKEN_EN;
-// const TOKEN_JP = process.env.TOKEN_JP;
-// const TOKEN_KR = process.env.TOKEN_KR;
-// const TOKEN_TW = process.env.TOKEN_TW;
-// const UID_EN = process.env.UID_EN;
-// const UID_JP = process.env.UID_JP;
-// const UID_KR = process.env.UID_KR;
-// const UID_TW = process.env.UID_TW;
-
-const SEASONS = [BB_SEASON, FE_SEASON];
-const REGIONS = ['en', 'jp', 'kr', 'tw', 'cn'];
 
 const regionData = {};
 const removedData = {};
@@ -386,12 +356,7 @@ function markServerTimeStamp(serverTimeStamp) {
     _cachedClientSyncTimeSinceStartup = Math.floor(process.uptime());
 }
 
-async function isAutumnPlayingStellaSoraRightNow() {
-    const lanyard = await fetch('https://api.lanyard.rest/v1/users/393694671383166998').then(res => res.json());
-    return lanyard.data?.activities?.some(activity => activity.name === 'Stella Sora');
-}
-
-async function doIkeHandshake(serverUrl = SERVER_URL_EN, serverGarbleKey = SERVER_GARBLE_KEY_EN) {
+async function doIkeHandshake(serverUrl = SERVER_URL_CN, serverGarbleKey = SERVER_GARBLE_KEY_CN) {
     const ecdh = crypto.createECDH('prime256v1');
     const clientPub = ecdh.generateKeys();
     const reqMsg = IKEReq.create({ ClientTs: Math.floor(Date.now() / 1000), ProtoVersion: 1, PubKey: clientPub });
@@ -515,7 +480,7 @@ function makeHeader10() {
     return buf;
 }
 
-function buildNovaMessage(msgId, bodyBuf, cipher, sessionKey, useServerGarble = false, serverGarbleKey = SERVER_GARBLE_KEY_EN) {
+function buildNovaMessage(msgId, bodyBuf, cipher, sessionKey, useServerGarble = false, serverGarbleKey = SERVER_GARBLE_KEY_CN) {
     if (!Buffer.isBuffer(bodyBuf)) bodyBuf = Buffer.from(bodyBuf || []);
     const pkt = Buffer.alloc(2 + bodyBuf.length);
     pkt.writeUInt16BE(msgId, 0);
@@ -596,54 +561,7 @@ async function doPlayerLogin_CN(sessionToken, cipher, sessionKey, accountLoginTo
     }
 }
 
-async function getPlayerData(token, cipher, sessionKey, serverUrl = SERVER_URL_EN, serverGarbleKey = SERVER_GARBLE_KEY_EN) {
-    const player_data_req = 1001;
-    const player_data_succeed_ack = 1002;
-
-    const payload = buildNovaMessage(player_data_req, Buffer.alloc(0), cipher, sessionKey, false, serverGarbleKey);
-    const url = serverUrl + '/agent-zone-1/';
-    const respBuf = await postBuffer(url, payload, { 'X-Token': token });
-    let decPlain;
-    if (cipher === 1) {
-        decPlain = decryptChaCha(respBuf, sessionKey, _useAad);
-    } else {
-        decPlain = decryptGCM(respBuf, sessionKey, _useAad);
-    }
-
-    let respMsgId = null;
-    respMsgId = decPlain.readUInt16BE(0);
-
-    if (respMsgId === player_data_succeed_ack) {
-        const protoBuf = decPlain.slice(2);
-        const info = PlayerInfoType.decode(protoBuf);
-        return info;
-    } else {
-        throw new Error('Unexpected player_data response msgId: ' + respMsgId);
-    }
-}
-
-function saveInventoryToFile(info, filename) {
-    const obj = PlayerInfoType.toObject(info, { longs: String, enums: String, bytes: 'base64' });
-    const items = (obj.Items || []).slice();
-    const res = (obj.Res || []).slice();
-
-    items.sort((a, b) => {
-        const ta = Number(a.Tid ?? a.tid ?? 0);
-        const tb = Number(b.Tid ?? b.tid ?? 0);
-        return ta - tb;
-    });
-
-    res.sort((a, b) => {
-        const ta = Number(a.Tid ?? 0);
-        const tb = Number(b.Tid ?? 0);
-        return ta - tb;
-    });
-
-    fs.writeFileSync(filename, JSON.stringify({ Items: items, Res: res }), { encoding: 'utf8' });
-    console.log('Inventory saved to', filename);
-}
-
-async function getScoreBossRank(token, cipher, sessionKey, serverUrl = SERVER_URL_EN, serverGarbleKey = SERVER_GARBLE_KEY_EN) {
+async function getScoreBossRank(token, cipher, sessionKey, serverUrl = SERVER_URL_CN, serverGarbleKey = SERVER_GARBLE_KEY_CN) {
     const score_boss_rank_req = 11107;
     const score_boss_rank_succeed_ack = 11108;
 
@@ -669,7 +587,7 @@ async function getScoreBossRank(token, cipher, sessionKey, serverUrl = SERVER_UR
     }
 }
 
-function storeScoreBossRank(info, region) {
+function storeScoreBossRank_CN(info, region) {
     const obj = ScoreBossRankInfo.toObject(info, { longs: String, enums: String, bytes: 'base64' });
     if (!obj || Object.keys(obj).length === 0) {
         console.warn('ScoreBossRank info is empty; skipping');
@@ -677,7 +595,7 @@ function storeScoreBossRank(info, region) {
     }
 
     let oldRank = [];
-    const lbFile = path.join(__dirname, `${BB_SEASON}.json`);
+    const lbFile = path.join(__dirname, `${BB_SEASON}_cn.json`);
     if (fs.existsSync(lbFile)) {
         const prevSeason = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
         const prevRegion = prevSeason?.region?.[region];
@@ -706,7 +624,7 @@ function storeScoreBossRank(info, region) {
     console.log(`ScoreBossRank info stored (${region.toUpperCase()})`);
 }
 
-async function getJointDrillRank(token, cipher, sessionKey, serverUrl = SERVER_URL_EN, serverGarbleKey = SERVER_GARBLE_KEY_EN) {
+async function getJointDrillRank(token, cipher, sessionKey, serverUrl = SERVER_URL_CN, serverGarbleKey = SERVER_GARBLE_KEY_CN) {
     const joint_drill_rank_req = 6225;
     const joint_drill_rank_succeed_ack = 6226;
 
@@ -732,7 +650,7 @@ async function getJointDrillRank(token, cipher, sessionKey, serverUrl = SERVER_U
     }
 }
 
-function storeJointDrillRank(info, region) {
+function storeJointDrillRank_CN(info, region) {
     const obj = JointDrillRankInfo.toObject(info, { longs: String, enums: String, bytes: 'base64' });
     if (!obj || Object.keys(obj).length === 0) {
         console.warn('JointDrillRank info is empty; skipping');
@@ -740,7 +658,7 @@ function storeJointDrillRank(info, region) {
     }
 
     let oldRank = [];
-    const lbFile = path.join(__dirname, `${FE_SEASON}.json`);
+    const lbFile = path.join(__dirname, `${FE_SEASON}_cn.json`);
     if (fs.existsSync(lbFile)) {
         const prevSeason = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
         const prevRegion = prevSeason?.region?.[region];
@@ -769,459 +687,32 @@ function storeJointDrillRank(info, region) {
     console.log(`JointDrillRank info stored (${region.toUpperCase()})`);
 }
 
-function getSeasonPrefix(season) {
-    return String(season).replace(/\d+/g, '');
-}
+async function genLatestSeasonNameConfig_CN(params) {
+    const now = new Date();
+    const JointDrillActivityType = 7
 
-function getSeasonRegionKey(season, region) {
-    return `${getSeasonPrefix(season)}${region}`;
-}
-
-function combineLeaderboard(season) {
-    const prefix = getSeasonPrefix(season);
-    const combined = [];
-    let sumTotal = 0;
-    let maxRefresh = 0;
-
-    for (const region of REGIONS) {
-        const json = regionData[getSeasonRegionKey(season, region)];
-        if (!json) continue;
-        sumTotal += Number(json.Total) || 0;
-        const lr = Number(json.LastRefreshTime) || 0;
-        if (lr > maxRefresh) maxRefresh = lr;
-        const rankArr = json.Rank || [];
-        for (const r of rankArr) {
-            const copy = Object.assign({}, r);
-            const nick = copy.NickName;
-            copy.NickName = `${nick} (${region.toUpperCase()})`;
-            combined.push(copy);
-        }
-    }
-
-    combined.sort((a, b) => {
-        const sa = a.Score;
-        const sb = b.Score;
-        if (sa === sb) return 0;
-        return sb - sa;
-    });
-
-    let lastScore = null;
-    let lastRank = 0;
-    for (let i = 0; i < combined.length; i++) {
-        const s = combined[i].Score;
-        if (i === 0) {
-            lastRank = 1;
-            combined[i].Rank = lastRank;
-            lastScore = s;
-        } else if (s === lastScore) {
-            combined[i].Rank = lastRank;
-        } else {
-            const rank = i + 1;
-            combined[i].Rank = rank;
-            lastRank = rank;
-            lastScore = s;
-        }
-    }
-
-    if (!Array.isArray(combined) || combined.length === 0 || combined.every(r => !r || Object.keys(r).length === 0)) {
-        console.warn(`Combined leaderboard for ${season} is empty; skipping`);
-        return;
-    }
-
-    const out = { Rank: combined, Total: sumTotal, LastRefreshTime: String(maxRefresh) };
-    const combinedKey = `${prefix}all`;
-    regionData[combinedKey] = out;
-    removedData[combinedKey] = [...REGIONS.map(r => removedData[getSeasonRegionKey(season, r)] || []).flat()];
-    console.log(`Combined leaderboard for ${season} stored`);
-}
-
-async function processSeason(season) {
-    const regionKeys = [...REGIONS, 'all'];
-    const regionMap = {};
-    for (const rk of regionKeys) {
-        const fname = getSeasonRegionKey(season, rk);
-        regionMap[rk] = regionData[fname] || null;
-    }
-    const missingRegions = REGIONS.filter((rk) => {
-        if (rk === 'cn') return false;
-        const region = regionMap[rk];
-        return !region || !Array.isArray(region.Rank) || region.Rank.length === 0;
-    });
-    if (missingRegions.length > 0) {
-        console.warn(`Skipping processing ${season}; missing region data: ${missingRegions.join(', ')}`);
-        return;
-    }
-
-    const [characterIdData, starTowerBuildRankData, potentialData, blitzData, raidData] = await Promise.all([
-        fetch(CHARACTERID_URL).then(res => res.json()),
-        fetch(STARTOWERBUILDRANK_URL).then(res => res.json()),
-        fetch(POTENTIAL_URL).then(res => res.json()),
-        fetch(BLITZ_URL).then(res => res.json()),
-        fetch(RAID_URL).then(res => res.json()),
+    const [activityData, scoreBossControlData] = await Promise.all([
+        fetch(Activity_URL).then(res => res.json()),
+        fetch(SCOREBOSSCONTROL_URL).then(res => res.json())
     ]);
+    
+    const curSeasonBBId = Object.values(scoreBossControlData).find(item =>
+        now >= new Date(item.StartTime) && now < new Date(item.EndTime)
+    )?.Id ?? 0;
+    
+    const latestSeasonFEId = Object.values(activityData).reduce((maxId, item) => {
+        if (item.ActivityType !== JointDrillActivityType) return maxId;
+        return item.Id > maxId ? item.Id : maxId;
+    }, 0) % 51000 || 0;
 
-    const region = {};
-    const globalNeededCharIds = new Set();
-
-    for (const rk of regionKeys) {
-        const rd = regionMap[rk];
-        if (!rd) continue;
-
-        if (rd.Rank) {
-            for (const entry of rd.Rank) {
-                for (const team of entry.Teams || []) {
-                    team.RecordRank = computeRecordRank(team.BuildScore, starTowerBuildRankData || {});
-                }
-            }
-        }
-
-        if (rd.Self?.Teams) {
-            for (const team of rd.Self.Teams) {
-                team.RecordRank = computeRecordRank(team.BuildScore, starTowerBuildRankData || {});
-            }
-        }
-
-        const charCountsAll = {};
-        const charUsersAll = {};
-        const charCountsByFloor = {};
-        const charUsersByFloor = {};
-        if (rd.Rank) {
-            for (const entry of rd.Rank) {
-                const perFloorCharSets = {};
-                for (const team of entry.Teams || []) {
-                    const fid = String(team.LevelId ?? '');
-                    if (!fid) continue;
-                    if (!perFloorCharSets[fid]) perFloorCharSets[fid] = new Set();
-                    for (const c of team.Chars || []) perFloorCharSets[fid].add(+c.Id);
-                }
-
-                for (const fid of Object.keys(perFloorCharSets)) {
-                    if (!charCountsByFloor[fid]) charCountsByFloor[fid] = {};
-                    if (!charUsersByFloor[fid]) charUsersByFloor[fid] = {};
-                    for (const cid of perFloorCharSets[fid]) {
-                        charCountsByFloor[fid][cid] = (charCountsByFloor[fid][cid] || 0) + 1;
-                        charUsersByFloor[fid][cid] = charUsersByFloor[fid][cid] || [];
-                        charUsersByFloor[fid][cid].push({ id: entry.Id, name: entry.NickName, rank: entry.Rank });
-                    }
-                }
-
-                const playerChars = new Set();
-                for (const team of entry.Teams || []) {
-                    for (const c of team.Chars || []) playerChars.add(+c.Id);
-                }
-                for (const cid of playerChars) {
-                    charCountsAll[cid] = (charCountsAll[cid] || 0) + 1;
-                    charUsersAll[cid] = charUsersAll[cid] || [];
-                    charUsersAll[cid].push({ id: entry.Id, name: entry.NickName, rank: entry.Rank });
-                }
-            }
-        }
-
-        const usageByFloor = {};
-        for (const fid of Object.keys(charCountsByFloor)) {
-            const counts = charCountsByFloor[fid] || {};
-            const users = charUsersByFloor[fid] || {};
-            const list = Object.keys(counts)
-                .map((k) => {
-                    const idNum = +k;
-                    const name = (characterIdData && characterIdData[idNum]) || undefined;
-                    const us = (users[k] || []).map((u) => ({ id: u.id, name: u.name, rank: u.rank }));
-                    return { id: idNum, count: counts[k], name, users: us };
-                })
-                .sort((a, b) => b.count - a.count);
-            let prevCountLocal = null;
-            let currentRankLocal = 0;
-            for (let i = 0; i < list.length; i++) {
-                if (list[i].count !== prevCountLocal) currentRankLocal = i + 1;
-                list[i].rank = currentRankLocal;
-                prevCountLocal = list[i].count;
-            }
-            usageByFloor[fid] = list;
-        }
-
-        const usageAll = Object.keys(charCountsAll)
-            .map((k) => {
-                const idNum = +k;
-                const name = (characterIdData && characterIdData[idNum]) || undefined;
-                const users = (charUsersAll[k] || []).map((u) => ({ id: u.id, name: u.name, rank: u.rank }));
-                return { id: idNum, count: charCountsAll[k], name, users };
-            })
-            .sort((a, b) => b.count - a.count);
-        let prevCountLocal = null;
-        let currentRankLocal = 0;
-        for (let i = 0; i < usageAll.length; i++) {
-            if (usageAll[i].count !== prevCountLocal) currentRankLocal = i + 1;
-            usageAll[i].rank = currentRankLocal;
-            prevCountLocal = usageAll[i].count;
-        }
-        usageByFloor['all'] = usageAll;
-
-        const teamCountsAll = {};
-        const teamUsersAll = {};
-        const teamCountsByFloor = {};
-        const teamUsersByFloor = {};
-        if (rd.Rank) {
-            for (const entry of rd.Rank) {
-                const perFloorTeamSets = {};
-                for (const team of entry.Teams || []) {
-                    const fid = String(team.LevelId ?? '');
-                    if (!fid) continue;
-                    const ids = [(team.Chars[0] || {}).Id, (team.Chars[1] || {}).Id, (team.Chars[2] || {}).Id];
-                    const main = ids[0];
-                    const support = [ids[1], ids[2]].sort((a, b) => a - b);
-                    const key = `${main}-${support[0]}-${support[1]}`;
-                    if (!perFloorTeamSets[fid]) perFloorTeamSets[fid] = new Set();
-                    if (perFloorTeamSets[fid].has(key)) continue;
-                    perFloorTeamSets[fid].add(key);
-
-                    if (!teamCountsByFloor[fid]) teamCountsByFloor[fid] = {};
-                    if (!teamUsersByFloor[fid]) teamUsersByFloor[fid] = {};
-                    teamCountsByFloor[fid][key] = (teamCountsByFloor[fid][key] || 0) + 1;
-                    teamUsersByFloor[fid][key] = teamUsersByFloor[fid][key] || [];
-                    teamUsersByFloor[fid][key].push({ id: entry.Id, name: entry.NickName, rank: entry.Rank, chars: ids, teamScore: getTeamScoreForSeason(team, season) });
-                }
-
-                const playerTeams = new Set();
-                for (const team of entry.Teams || []) {
-                    const ids = [(team.Chars[0] || {}).Id, (team.Chars[1] || {}).Id, (team.Chars[2] || {}).Id];
-                    const main = ids[0];
-                    const support = [ids[1], ids[2]].sort((a, b) => a - b);
-                    const key = `${main}-${support[0]}-${support[1]}`;
-                    if (playerTeams.has(key)) continue;
-                    playerTeams.add(key);
-                    teamCountsAll[key] = (teamCountsAll[key] || 0) + 1;
-                    teamUsersAll[key] = teamUsersAll[key] || [];
-                    teamUsersAll[key].push({ id: entry.Id, name: entry.NickName, rank: entry.Rank, chars: ids, teamScore: getTeamScoreForSeason(team, season) });
-                }
-            }
-        }
-
-        const usageTeamByFloor = {};
-        for (const fid of Object.keys(teamCountsByFloor)) {
-            const counts = teamCountsByFloor[fid] || {};
-            const users = teamUsersByFloor[fid] || {};
-            const list = Object.keys(counts).map((k) => {
-                const parts = k.split('-').map((n) => Number(n));
-                const mainId = parts[0];
-                const support0 = parts[1];
-                const support1 = parts[2];
-                const us = (users[k] || []).map((u) => ({ id: u.id, name: u.name, rank: u.rank, teamScore: u.teamScore }));
-                const topUser = us.length ? us.reduce((best, u) => (!best || (u.teamScore || 0) > (best.teamScore || 0) ? u : best), null) : null;
-                const mainName = (characterIdData && characterIdData[mainId]) || undefined;
-                const supportName0 = (characterIdData && characterIdData[support0]) || undefined;
-                const supportName1 = (characterIdData && characterIdData[support1]) || undefined;
-                const displayName = `${mainName || mainId} • ${supportName0 || support0}, ${supportName1 || support1}`;
-                return { key: k, main: mainId, members: [mainId, support0, support1], count: counts[k], name: displayName, users: us, topUser };
-            });
-            list.sort((a, b) => b.count - a.count);
-            let prev = null;
-            let rank = 0;
-            for (let i = 0; i < list.length; i++) {
-                if (list[i].count !== prev) rank = i + 1;
-                list[i].rank = rank;
-                prev = list[i].count;
-            }
-            usageTeamByFloor[fid] = list;
-        }
-
-        const usageTeamAll = Object.keys(teamCountsAll).map((k) => {
-            const parts = k.split('-').map((n) => Number(n));
-            const mainId = parts[0];
-            const support0 = parts[1];
-            const support1 = parts[2];
-            const users = (teamUsersAll[k] || []).map((u) => ({ id: u.id, name: u.name, rank: u.rank, teamScore: u.teamScore }));
-            const topUser = users.length ? users.reduce((best, u) => (!best || (u.teamScore || 0) > (best.teamScore || 0) ? u : best), null) : null;
-            const mainName = (characterIdData && characterIdData[mainId]) || undefined;
-            const supportName0 = (characterIdData && characterIdData[support0]) || undefined;
-            const supportName1 = (characterIdData && characterIdData[support1]) || undefined;
-            const displayName = `${mainName || mainId} • ${supportName0 || support0}, ${supportName1 || support1}`;
-            return { key: k, main: mainId, members: [mainId, support0, support1], count: teamCountsAll[k], name: displayName, users: users, topUser };
-        });
-        usageTeamAll.sort((a, b) => b.count - a.count);
-        prev = null;
-        rank = 0;
-        for (let i = 0; i < usageTeamAll.length; i++) {
-            if (usageTeamAll[i].count !== prev) rank = i + 1;
-            usageTeamAll[i].rank = rank;
-            prev = usageTeamAll[i].count;
-        }
-        usageTeamByFloor['all'] = usageTeamAll;
-
-        rd.UsageByFloor = usageByFloor;
-        rd.UsageTeamByFloor = usageTeamByFloor;
-
-        const neededCharIds = new Set();
-        if (rd.Rank) {
-            for (const entry of rd.Rank) {
-                for (const team of entry.Teams || []) {
-                    for (const c of team.Chars || []) {
-                        neededCharIds.add(+c.Id);
-                    }
-                }
-            }
-        }
-        if (rd.Self?.Teams) {
-            for (const team of rd.Self.Teams) {
-                for (const c of team.Chars || []) {
-                    neededCharIds.add(+c.Id);
-                }
-            }
-        }
-        for (const n of neededCharIds) globalNeededCharIds.add(n);
-
-        region[rk] = rd;
-    }
-
-    const potentialDataSubset = {};
-    for (const idNum of globalNeededCharIds) {
-        if (potentialData && potentialData[idNum]) potentialDataSubset[idNum] = potentialData[idNum];
-    }
-
-    for (const rk2 of Object.keys(region)) {
-        const rd2 = region[rk2];
-        if (!rd2) continue;
-        if (Array.isArray(rd2.Rank)) {
-            for (const entry of rd2.Rank) {
-                for (const team of entry.Teams || []) {
-                    const tb = mapTeamPotentials(team);
-                    team.BuildCode = packPotentialData(tb, potentialDataSubset) || null;
-                }
-            }
-        }
-        if (rd2.Self && Array.isArray(rd2.Self.Teams)) {
-            for (const team of rd2.Self.Teams) {
-                const tb = mapTeamPotentials(team);
-                team.BuildCode = packPotentialData(tb, potentialDataSubset) || null;
-            }
-        }
-    }
-
-    const hasContent = Object.keys(region).some((k) => {
-        const rd = region[k];
-        if (!rd) return false;
-        if (Array.isArray(rd.Rank) && rd.Rank.length > 0) return true;
-        if (rd.Self && Object.keys(rd.Self).length > 0) return true;
-        return false;
-    });
-
-    if (!hasContent) {
-        console.log(`No data for ${season}; skipping`);
-    } else {
-        const out = { region };
-        const outName = `${season}.json`;
-        fs.writeFileSync(path.join(__dirname, outName), JSON.stringify(out), { encoding: 'utf8' });
-        console.log(`Processed leaderboard written to ${outName}`);
-    }
-}
-
-function isMetaEmpty(m) {
-    if (!m) return true;
-    if (m.floor && typeof m.floor === 'object' && Object.keys(m.floor).length > 0) return false;
-    const rem = m.removed || {};
-    for (const k of ['all', 'en', 'jp', 'kr', 'tw', 'cn']) {
-        if (Array.isArray(rem[k]) && rem[k].length > 0) return false;
-    }
-    return true;
-}
-
-function computeRecordRank(buildScore, rankData) {
-    if (!rankData) return null;
-    let best = null;
-    Object.keys(rankData).forEach((k) => {
-        const cfg = rankData[k];
-        const min = cfg.MinGrade || 0;
-        if (buildScore >= min) best = k;
-    });
-    return best;
-}
-
-function getTeamScoreForSeason(team, seasonName) {
-    if (!team) return 0;
-
-    if (seasonName === FE_SEASON) {
-        return -Number(team.Time);
-    }
-    return Number(team.LevelScore);
-}
-
-function packPotentialData(tbCharPotential, charCfgMap = {}) {
-    if (!Array.isArray(tbCharPotential) || tbCharPotential.length !== 3) return null;
-    const bitBuffer = [];
-    const addBit = (b) => bitBuffer.push(b ? 1 : 0);
-    const writeBits = (value, numBits) => {
-        for (let i = numBits - 1; i >= 0; i--) addBit((value >>> i) & 1);
-    };
-    const toUint32 = (num) => {
-        num = Math.floor(num || 0);
-        if (num < 0) num = 0;
-        if (num > 0xffffffff) num = 0xffffffff;
-        return num >>> 0;
-    };
-    const getLevelFromPotentials = (tbPotential, nId) => {
-        if (!Array.isArray(tbPotential)) return 0;
-        for (const p of tbPotential) {
-            if ((p.nId ?? p.Id ?? p.id) === nId) {
-                return (p.nLevel ?? p.Level ?? p.level ?? 0) | 0;
-            }
-        }
-        return 0;
-    };
-    const pack_potential = (tbAll, tbPotential, bSpecial) => {
-        for (const nId of tbAll) {
-            const nLevel = getLevelFromPotentials(tbPotential, nId);
-            if (bSpecial) writeBits(nLevel > 0 ? 1 : 0, 1);
-            else writeBits(nLevel, 3);
-        }
-    };
-
-    for (const v of tbCharPotential) {
-        const nCharId = v.nCharId ?? v.CharId ?? v.charId;
-        if (!nCharId || nCharId === 0) return null;
-        writeBits(toUint32(nCharId), 32);
-    }
-
-    tbCharPotential.forEach((v, idx) => {
-        const nCharId = v.nCharId ?? v.CharId ?? v.charId;
-        const potentials = v.tbPotential ?? v.Potentials ?? v.potentials ?? [];
-        const cfg = charCfgMap[nCharId];
-        if (!cfg) return null;
-        if (idx === 0) {
-            pack_potential(cfg.MasterSpecificPotentialIds || [], potentials, true);
-            pack_potential(cfg.MasterNormalPotentialIds || [], potentials, false);
-            pack_potential(cfg.CommonPotentialIds || [], potentials, false);
-        } else {
-            pack_potential(cfg.AssistSpecificPotentialIds || [], potentials, true);
-            pack_potential(cfg.AssistNormalPotentialIds || [], potentials, false);
-            pack_potential(cfg.CommonPotentialIds || [], potentials, false);
-        }
-    });
-
-    const bytes = [];
-    for (let i = 0; i < bitBuffer.length; i += 8) {
-        let byte = 0;
-        for (let j = 0; j < 8; j++) byte = (byte << 1) | (bitBuffer[i + j] || 0);
-        bytes.push(byte & 0xff);
-    }
-    return Buffer.from(bytes).toString('base64');
-}
-
-function mapTeamPotentials(team) {
-    const teamPots = team.Potentials || [];
-    const mappedPots = teamPots.map((p) => ({ Id: p.PotentialId ?? p.Id ?? p.id, Level: p.Level ?? p.nLevel ?? p.level }));
-    const chars = team.Chars || [];
-    const tb = [];
-    for (let i = 0; i < 3; i++) {
-        const c = chars[i] || { Id: 0 };
-        tb.push({ CharId: c.Id, Potentials: mappedPots });
-    }
-    return tb;
+    const data = { "BB_SEASON": `bb${curSeasonBBId}`, "FE_SEASON": `fe${latestSeasonFEId}` }
+    fs.writeFileSync(path.join(__dirname, 'season.json'), JSON.stringify(data, null, 4), { encoding: 'utf8' });
+    return data
 }
 
 (async () => {
-    // if (await isAutumnPlayingStellaSoraRightNow()) {
-    //     console.log('Autumn is playing Stella Sora; skipping');
-    //     return;
-    // }
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    const { BB_SEASON: BB_SEASON_NAME, FE_SEASON: FE_SEASON_NAME } = await genLatestSeasonNameConfig_CN();
 
     if (TOKEN_CN) {
         console.log('Starting IKE handshake (CN)...');
@@ -1246,196 +737,13 @@ function mapTeamPotentials(team) {
 
         console.log('Requesting ScoreBossRank (CN)...');
         const bbCN = await getScoreBossRank(newTokenCN, cipherCN, sessionKeyCN, SERVER_URL_CN, SERVER_GARBLE_KEY_CN);
-        console.log(bbCN)
-        storeScoreBossRank(bbCN, 'cn');
+        storeScoreBossRank_CN(bbCN, 'cn');
 
         console.log('Requesting JointDrillRank (CN)...');
         const feCN = await getJointDrillRank(newTokenCN, cipherCN, sessionKeyCN, SERVER_URL_CN, SERVER_GARBLE_KEY_CN);
-        console.log(feCN)
-        storeJointDrillRank(feCN, 'cn');
+        storeJointDrillRank_CN(feCN, 'cn');
     }
 
-    combineLeaderboard(BB_SEASON);
-    combineLeaderboard(FE_SEASON);
-
-    const metaFile = path.join(__dirname, 'meta.json');
-    let oldMeta = {};
-    if (fs.existsSync(metaFile)) {
-        const oldContent = fs.readFileSync(metaFile, 'utf8');
-        oldMeta = JSON.parse(oldContent);
-    }
-
-    let seasonChanged = false;
-
-    const seasonMeta = {};
-    for (let season of SEASONS) {
-        const meta = { floor: {}, removed: { all: [], en: [], jp: [], kr: [], tw: [], cn: [] } };
-        const seasonPrefix = getSeasonPrefix(season);
-
-        let enJson = null;
-        const enKey = `${seasonPrefix}en`;
-        if (regionData[enKey]) {
-            enJson = regionData[enKey];
-        } else {
-            const lbFile = path.join(__dirname, `${season}.json`);
-            if (fs.existsSync(lbFile)) {
-                const prevSeason = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
-                enJson = prevSeason && prevSeason.region && prevSeason.region.en ? prevSeason.region.en : null;
-            }
-        }
-        if (enJson) {
-            const rankArr = Array.isArray(enJson.Rank) ? enJson.Rank : [];
-            const levelSet = new Set();
-            if (rankArr.length > 0) {
-                const topTeams = Array.isArray(rankArr[0].Teams) ? rankArr[0].Teams : [];
-                const lastTeams = Array.isArray(rankArr[rankArr.length - 1].Teams) ? rankArr[rankArr.length - 1].Teams : [];
-                for (const t of topTeams) {
-                    if (t && typeof t.LevelId !== 'undefined') levelSet.add(Number(t.LevelId));
-                }
-                for (const t of lastTeams) {
-                    if (t && typeof t.LevelId !== 'undefined') levelSet.add(Number(t.LevelId));
-                }
-            }
-
-            const isBBSeason = /^bb/.test(season);
-            const [blitzDataRemote, raidDataRemote] = await Promise.all([fetch(BLITZ_URL).then(res => res.json()), fetch(RAID_URL).then(res => res.json())]);
-            const remoteMap = isBBSeason ? (blitzDataRemote || {}) : (raidDataRemote || {});
-
-            meta.floor = Array.from(levelSet).sort((a, b) => a - b).reduce((m, lid) => {
-                const fd = remoteMap[lid] || remoteMap[String(lid)] || {};
-                m[String(lid)] = { name: fd.name || fd.Name || String(lid), icon: fd.icon || fd.Icon || null };
-                return m;
-            }, {});
-        }
-
-        const regions = ['all', ...REGIONS];
-        for (const r of regions) {
-            const key = r === 'all' ? `${seasonPrefix}all` : getSeasonRegionKey(season, r);
-            meta.removed[r] = Array.isArray(removedData[key]) ? removedData[key] : [];
-        }
-
-        let oldFloorIds = '';
-        const currentFloorIds = Object.keys(meta.floor).sort().join(',');
-        const lbFile = path.join(__dirname, `${season}.json`);
-        if (fs.existsSync(lbFile)) {
-            const prevSeasonData = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
-            const enFloorData = prevSeasonData?.region?.en?.UsageByFloor || {};
-            oldFloorIds = Object.keys(enFloorData).filter(k => k !== 'all').sort().join(',');
-        }
-
-        if (oldFloorIds && currentFloorIds && oldFloorIds !== currentFloorIds) {
-            console.log(`Floor changed from ${oldFloorIds} to ${currentFloorIds}. Incrementing season...`);
-            let oldSeason = season;
-            season = season.replace(/\d+/, (n) => String(Number(n) + 1));
-            seasonChanged = true;
-
-            const isBBSeason = /^bb/.test(season);
-            if (isBBSeason) {
-                BB_SEASON = season;
-            } else {
-                FE_SEASON = season;
-            }
-
-            for (const r of regions) {
-                delete removedData[getSeasonRegionKey(season, r)];
-            }
-        }
-
-        seasonMeta[season] = meta;
-    }
-
-    if (seasonChanged) {
-        fs.writeFileSync(path.join(__dirname, 'season.json'), JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4), { encoding: 'utf8' });
-        console.log('Updated season.json file:', BB_SEASON, FE_SEASON);
-    }
-
-    SEASONS[0] = BB_SEASON;
-    SEASONS[1] = FE_SEASON;
-
-    for (const season of SEASONS) {
-        const present = new Set();
-        const seasonPrefix = getSeasonPrefix(season);
-        for (const fname of Object.keys(regionData)) {
-            let base = fname;
-            if (base.endsWith('.json')) base = path.basename(base, '.json');
-            if (!(base.startsWith(season) || base.startsWith(seasonPrefix))) continue;
-            const obj = regionData[fname] || regionData[base] || regionData[season + base.slice(season.length)];
-            if (!obj) continue;
-            if (Array.isArray(obj.Rank)) {
-                for (const r of obj.Rank) {
-                    if (!r) continue;
-                    const id = Number(r.Id || r.id || 0) || 0;
-                    if (id) present.add(id);
-                }
-            } else if (obj.region && typeof obj.region === 'object') {
-                for (const rk of Object.keys(obj.region)) {
-                    const rr = obj.region[rk];
-                    if (!rr || !Array.isArray(rr.Rank)) continue;
-                    for (const r of rr.Rank) {
-                        if (!r) continue;
-                        const id = Number(r.Id || r.id || 0) || 0;
-                        if (id) present.add(id);
-                    }
-                }
-            }
-        }
-
-        const prevSeason = oldMeta && oldMeta[season] && oldMeta[season].removed ? oldMeta[season].removed : null;
-        if (!seasonMeta[season]) seasonMeta[season] = { floor: {}, removed: { all: [], en: [], jp: [], kr: [], tw: [], cn: [] } };
-        if (prevSeason) {
-            for (const r of ['all', 'en', 'jp', 'kr', 'tw', 'cn']) {
-                const rawNewList = Array.isArray(seasonMeta[season].removed[r]) ? seasonMeta[season].removed[r] : [];
-                const newList = rawNewList.filter((entry) => {
-                    const m2 = String(entry).match(/^(\d+)/);
-                    if (!m2) return true;
-                    const idNum2 = Number(m2[1]);
-                    return !present.has(idNum2);
-                });
-                const oldList = Array.isArray(prevSeason[r]) ? prevSeason[r] : [];
-                const prevFiltered = oldList.filter((entry) => {
-                    const m = String(entry).match(/^(\d+)/);
-                    if (!m) return true;
-                    const idNum = Number(m[1]);
-                    return !present.has(idNum);
-                });
-                seasonMeta[season].removed[r] = Array.from(new Set([...prevFiltered, ...newList]));
-            }
-        }
-    }
-
-    const finalMeta = {};
-    for (const season of SEASONS) {
-        const m = seasonMeta[season];
-        const seasonFile = path.join(__dirname, `${season}.json`);
-        const hasProcessedFile = fs.existsSync(seasonFile);
-        if ((!oldMeta[season]) && (!isMetaEmpty(m) || hasProcessedFile)) {
-            finalMeta[season] = m;
-        }
-    }
-
-    for (const key of Object.keys(oldMeta)) {
-        if (finalMeta.hasOwnProperty(key)) continue;
-        const m = seasonMeta[key];
-        const seasonFile = path.join(__dirname, `${key}.json`);
-        const hasProcessedFile = fs.existsSync(seasonFile);
-        if (m) {
-            if (!isMetaEmpty(m) || hasProcessedFile) {
-                finalMeta[key] = m;
-            }
-        } else {
-            finalMeta[key] = oldMeta[key];
-        }
-    }
-
-    for (const key of Object.keys(finalMeta)) {
-        const meta = finalMeta[key];
-        if (meta && meta.removed && !Array.isArray(meta.removed.cn)) {
-            meta.removed.cn = [];
-        }
-    }
-
-    fs.writeFileSync(metaFile, JSON.stringify(finalMeta), { encoding: 'utf8' });
-
-    await processSeason(BB_SEASON);
-    await processSeason(FE_SEASON);
+    fs.writeFileSync(path.join(__dirname, `${BB_SEASON_NAME}_cn.json`), JSON.stringify(regionData.bbcn), { encoding: 'utf8' });
+    fs.writeFileSync(path.join(__dirname, `${FE_SEASON_NAME}_cn.json`), JSON.stringify(regionData.fecn), { encoding: 'utf8' });
 })();
