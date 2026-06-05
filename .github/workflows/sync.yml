@@ -42,6 +42,7 @@ jobs:
         # UID_JP: ${{ secrets.UID_JP }}
         # UID_KR: ${{ secrets.UID_KR }}
         # UID_TW: ${{ secrets.UID_TW }}
+        DEVICE_CN: ${{secrets.DEVICE_CN}}
         UID_CN: ${{ secrets.UID_CN }}
         TOKEN_CN: ${{ secrets.TOKEN_CN }}
       run: |
