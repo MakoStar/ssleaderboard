@@ -30,23 +30,26 @@ jobs:
     - name: Sync
       env:
         DEVICE: ${{ secrets.DEVICE }}
-        EMAIL_EN: ${{ secrets.EMAIL_EN }}
-        EMAIL_JP: ${{ secrets.EMAIL_JP }}
-        EMAIL_KR: ${{ secrets.EMAIL_KR }}
-        EMAIL_TW: ${{ secrets.EMAIL_TW }}
-        TOKEN_EN: ${{ secrets.TOKEN_EN }}
-        TOKEN_JP: ${{ secrets.TOKEN_JP }}
-        TOKEN_KR: ${{ secrets.TOKEN_KR }}
-        TOKEN_TW: ${{ secrets.TOKEN_TW }}
-        UID_EN: ${{ secrets.UID_EN }}
-        UID_JP: ${{ secrets.UID_JP }}
-        UID_KR: ${{ secrets.UID_KR }}
-        UID_TW: ${{ secrets.UID_TW }}
+        # EMAIL_EN: ${{ secrets.EMAIL_EN }}
+        # EMAIL_JP: ${{ secrets.EMAIL_JP }}
+        # EMAIL_KR: ${{ secrets.EMAIL_KR }}
+        # EMAIL_TW: ${{ secrets.EMAIL_TW }}
+        # TOKEN_EN: ${{ secrets.TOKEN_EN }}
+        # TOKEN_JP: ${{ secrets.TOKEN_JP }}
+        # TOKEN_KR: ${{ secrets.TOKEN_KR }}
+        # TOKEN_TW: ${{ secrets.TOKEN_TW }}
+        # UID_EN: ${{ secrets.UID_EN }}
+        # UID_JP: ${{ secrets.UID_JP }}
+        # UID_KR: ${{ secrets.UID_KR }}
+        # UID_TW: ${{ secrets.UID_TW }}
+        DEVICE_CN: ${{secrets.DEVICE_CN}}
+        UID_CN: ${{ secrets.UID_CN }}
+        TOKEN_CN: ${{ secrets.TOKEN_CN }}
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         pnpm install
-        node index.js
+        node index_cn.js
         git add .
         if ! git diff --cached --quiet; then
           git commit -m "sync"
