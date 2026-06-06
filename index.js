@@ -11,14 +11,13 @@ if (fs.existsSync(ENV_FILE)) {
     process.loadEnvFile(ENV_FILE);
 }
 
-const CN_BB_URL = null;
-const CN_FE_URL = null;
-
 const BLITZ_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/blitz.json';
 const RAID_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/raid.json';
 const CHARACTERID_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/characterid.json';
 const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/EN/bin/StarTowerBuildRank.json';
 const POTENTIAL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/EN/bin/CharPotential.json';
+const ACTIVITY_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/EN/bin/Activity.json';
+const SCOREBOSSCONTROL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/ScoreBossControl.json';
 
 const VERSION = '727.727.727.7272727';
 const SDK_URL_EN = 'https://en-sdk-api.yostarplat.com';
@@ -186,7 +185,21 @@ message OfficialOverseas {
     optional string Token = 2;
 }
 
+message Regular {
+    optional string Name = 1;
+    optional string Pass = 2;
+    optional bytes NextPackage = 2047;
+}
+
+message Official {
+    optional uint64 Uid = 1;
+    optional string Token = 2;
+    optional bytes NextPackage = 2047;
+}
+
 message LoginReq {
+    optional Regular Account = 1;
+    optional Official Official = 2;
     optional OfficialOverseas OfficialOverseas = 3;
     optional string Token = 4;
     optional int32 Platform = 11;
@@ -365,6 +378,35 @@ function markServerTimeStamp(serverTimeStamp) {
 async function isAutumnPlayingStellaSoraRightNow() {
     const lanyard = await fetch('https://api.lanyard.rest/v1/users/393694671383166998').then(res => res.json());
     return lanyard.data?.activities?.some(activity => activity.name === 'Stella Sora');
+}
+
+async function getLatestSeason() {
+    const now = new Date();
+    const JointDrillActivityType = 7;
+
+    console.log('Getting latest season info...');
+
+    const [activityData, scoreBossControlData] = await Promise.all([
+        fetch(ACTIVITY_URL).then(res => res.json()),
+        fetch(SCOREBOSSCONTROL_URL).then(res => res.json())
+    ]);
+
+    const currentSeasonBBId = Object.values(scoreBossControlData).find(item =>
+        now >= new Date(item.StartTime) && now < new Date(item.EndTime)
+    )?.Id;
+
+    const latestSeasonFEId = Object.values(activityData).reduce((maxId, item) => {
+        if (item.ActivityType !== JointDrillActivityType) return maxId;
+        return item.Id > maxId ? item.Id : maxId;
+    }, 0) % 51000;
+
+    BB_SEASON = currentSeasonBBId ? `bb${currentSeasonBBId}` : BB_SEASON;
+    FE_SEASON = latestSeasonFEId ? `fe${latestSeasonFEId}` : FE_SEASON;
+    SEASONS[0] = BB_SEASON;
+    SEASONS[1] = FE_SEASON;
+
+    console.log(`Latest seasons - BB: ${BB_SEASON}, FE: ${FE_SEASON}`);
+    fs.writeFileSync(path.join(__dirname, 'season.json'), JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4), { encoding: 'utf8' });
 }
 
 async function doIkeHandshake(serverUrl = SERVER_URL_EN, serverGarbleKey = SERVER_GARBLE_KEY_EN) {
@@ -801,7 +843,7 @@ function getSeasonRegionKey(season, region) {
 }
 
 function combineLeaderboard(season) {
-    const prefix = getSeasonPrefix(season);
+    const seasonPrefix = getSeasonPrefix(season);
     const combined = [];
     let sumTotal = 0;
     let maxRefresh = 0;
@@ -852,7 +894,7 @@ function combineLeaderboard(season) {
     }
 
     const out = { Rank: combined, Total: sumTotal, LastRefreshTime: String(maxRefresh) };
-    const combinedKey = `${prefix}all`;
+    const combinedKey = `${seasonPrefix}all`;
     regionData[combinedKey] = out;
     removedData[combinedKey] = [...REGIONS.map(r => removedData[getSeasonRegionKey(season, r)] || []).flat()];
     console.log(`Combined leaderboard for ${season} stored`);
@@ -1246,6 +1288,11 @@ function mapTeamPotentials(team) {
         return;
     }
 
+    await getLatestSeason();
+
+    const CN_BB_URL = `https://raw.githubusercontent.com/MakoStar/ssleaderboard/refs/heads/main/${BB_SEASON}_cn.json`;
+    const CN_FE_URL = `https://raw.githubusercontent.com/MakoStar/ssleaderboard/refs/heads/main/${FE_SEASON}_cn.json`;
+
     if (EMAIL_EN || TOKEN_EN) {
         console.log('Starting IKE handshake (EN)...');
         const { token, cipher, sessionKey } = await doIkeHandshake();
@@ -1436,15 +1483,15 @@ function mapTeamPotentials(team) {
     }
 
     if (CN_BB_URL) {
-        const bbCN = await fetch(CN_BB_URL).then(res => res.json());
+        const bbCN = await fetch(CN_BB_URL).then(res => res.json()).catch(() => null);
         if (bbCN) {
-            regionData.cn = bbCN;
+            regionData.bbcn = bbCN;
             console.log('ScoreBossRank info stored (CN)');
         }
     }
 
     if (CN_FE_URL) {
-        const feCN = await fetch(CN_FE_URL).then(res => res.json());
+        const feCN = await fetch(CN_FE_URL).then(res => res.json()).catch(() => null);
         if (feCN) {
             regionData.fecn = feCN;
             console.log('JointDrillRank info stored (CN)');
@@ -1460,8 +1507,6 @@ function mapTeamPotentials(team) {
         const oldContent = fs.readFileSync(metaFile, 'utf8');
         oldMeta = JSON.parse(oldContent);
     }
-
-    let seasonChanged = false;
 
     const seasonMeta = {};
     for (let season of SEASONS) {
@@ -1510,43 +1555,8 @@ function mapTeamPotentials(team) {
             meta.removed[r] = Array.isArray(removedData[key]) ? removedData[key] : [];
         }
 
-        let oldFloorIds = '';
-        const currentFloorIds = Object.keys(meta.floor).sort().join(',');
-        const lbFile = path.join(__dirname, `${season}.json`);
-        if (fs.existsSync(lbFile)) {
-            const prevSeasonData = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
-            const enFloorData = prevSeasonData?.region?.en?.UsageByFloor || {};
-            oldFloorIds = Object.keys(enFloorData).filter(k => k !== 'all').sort().join(',');
-        }
-
-        if (oldFloorIds && currentFloorIds && oldFloorIds !== currentFloorIds) {
-            console.log(`Floor changed from ${oldFloorIds} to ${currentFloorIds}. Incrementing season...`);
-            let oldSeason = season;
-            season = season.replace(/\d+/, (n) => String(Number(n) + 1));
-            seasonChanged = true;
-
-            const isBBSeason = /^bb/.test(season);
-            if (isBBSeason) {
-                BB_SEASON = season;
-            } else {
-                FE_SEASON = season;
-            }
-
-            for (const r of regions) {
-                delete removedData[getSeasonRegionKey(season, r)];
-            }
-        }
-
         seasonMeta[season] = meta;
     }
-
-    if (seasonChanged) {
-        fs.writeFileSync(path.join(__dirname, 'season.json'), JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4), { encoding: 'utf8' });
-        console.log('Updated season.json file:', BB_SEASON, FE_SEASON);
-    }
-
-    SEASONS[0] = BB_SEASON;
-    SEASONS[1] = FE_SEASON;
 
     for (const season of SEASONS) {
         const present = new Set();
