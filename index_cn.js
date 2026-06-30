@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const protobuf = require('protobufjs');
 let { BB_SEASON, FE_SEASON } = require('./season.json');
+// let { SDK_VERSION, SDK_URL_CN } = require('./config.json')
 
 const ENV_FILE = path.join(__dirname, '.env');
 if (fs.existsSync(ENV_FILE)) {
@@ -15,7 +16,7 @@ const BLITZ_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/ref
 const RAID_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/raid.json';
 const CHARACTERID_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/characterid.json';
 
-const Activity_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/Activity.json';
+const ACTIVITY_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/Activity.json';
 const POTENTIAL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/CharPotential.json';
 const SCOREBOSSCONTROL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/ScoreBossControl.json';
 const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/StarTowerBuildRank.json';
@@ -393,6 +394,7 @@ async function doIkeHandshake(serverUrl = SERVER_URL_CN, serverGarbleKey = SERVE
     return { token, cipher, sessionKey };
 }
 
+
 const PRIVATE_KEY_CN = `-----BEGIN RSA PRIVATE KEY-----
 MIICXQIBAAKBgQDBdHUbBS5ZEnYbmLzUagVUD+WnG3h7vtPIb6lxLsIONtE35JEI
 PY3Q6+Klv+mMAR2f8yoxp/OAD2QGwOhpMVT7HK8HyDN6W4mjx6D61/5k3FhHRfok
@@ -687,32 +689,41 @@ function storeJointDrillRank_CN(info, region) {
     console.log(`JointDrillRank info stored (${region.toUpperCase()})`);
 }
 
-async function genLatestSeasonNameConfig_CN(params) {
+async function getLatestSeason_CN(params) {
     const now = new Date();
-    const JointDrillActivityType = 7
+    const ACTIVITY_ID_MODULUS = 510000;
+    const JOINT_DRILL_ACTIVITY_TYPE = 7;
 
     const [activityData, scoreBossControlData] = await Promise.all([
-        fetch(Activity_URL).then(res => res.json()),
+        fetch(ACTIVITY_URL).then(res => res.json()),
         fetch(SCOREBOSSCONTROL_URL).then(res => res.json())
     ]);
     
-    const curSeasonBBId = Object.values(scoreBossControlData).find(item =>
+    const currentSeasonBBId = Object.values(scoreBossControlData).find(item =>
         now >= new Date(item.StartTime) && now < new Date(item.EndTime)
-    )?.Id ?? 0;
+    )?.Id;
     
     const latestSeasonFEId = Object.values(activityData).reduce((maxId, item) => {
-        if (item.ActivityType !== JointDrillActivityType) return maxId;
+        if (item.ActivityType !== JOINT_DRILL_ACTIVITY_TYPE) return maxId;
         return item.Id > maxId ? item.Id : maxId;
-    }, 0) % 51000 || 0;
+    }, 0) % ACTIVITY_ID_MODULUS;
 
-    const data = { "BB_SEASON": `bb${curSeasonBBId}`, "FE_SEASON": `fe${latestSeasonFEId}` }
-    fs.writeFileSync(path.join(__dirname, 'season.json'), JSON.stringify(data, null, 4), { encoding: 'utf8' });
-    return data
+    BB_SEASON = currentSeasonBBId ? `bb${currentSeasonBBId}` : BB_SEASON;
+    FE_SEASON = latestSeasonFEId ? `fe${latestSeasonFEId}` : FE_SEASON;
+
+    console.log(`Latest seasons - BB: ${BB_SEASON}, FE: ${FE_SEASON}`);
+    fs.writeFileSync(path.join(__dirname, 'season.json'), JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4), { encoding: 'utf8' });
+    return [BB_SEASON, FE_SEASON]
 }
+
+
+// async function getClientConfig() {
+//     const 
+// }
 
 (async () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    const { BB_SEASON: BB_SEASON_NAME, FE_SEASON: FE_SEASON_NAME } = await genLatestSeasonNameConfig_CN();
+    const [BB_SEASON_NAME, FE_SEASON_NAME] = await getLatestSeason_CN();
 
     if (TOKEN_CN) {
         console.log('Starting IKE handshake (CN)...');
