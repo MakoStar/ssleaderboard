@@ -690,10 +690,10 @@ function storeJointDrillRank_CN(info, region) {
 }
 
 async function getLatestSeason_CN(params) {
-    const now = new Date();
     const ACTIVITY_ID_MODULUS = 510000;
     const JOINT_DRILL_ACTIVITY_TYPE = 7;
-
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+    
     const [activityData, scoreBossControlData] = await Promise.all([
         fetch(ACTIVITY_URL).then(res => res.json()),
         fetch(SCOREBOSSCONTROL_URL).then(res => res.json())
@@ -702,17 +702,34 @@ async function getLatestSeason_CN(params) {
     const currentSeasonBBId = Object.values(scoreBossControlData).find(item =>
         now >= new Date(item.StartTime) && now < new Date(item.EndTime)
     )?.Id;
-    
-    const latestSeasonFEId = Object.values(activityData).reduce((maxId, item) => {
-        if (item.ActivityType !== JOINT_DRILL_ACTIVITY_TYPE) return maxId;
-        return item.Id > maxId ? item.Id : maxId;
-    }, 0) % ACTIVITY_ID_MODULUS;
+
+    const activityJointDrills = Object.values(activityData).filter(item => 
+        item.ActivityType === JOINT_DRILL_ACTIVITY_TYPE
+    );
+
+    const latestRawFEId = activityJointDrills.reduce((acc, item) => {
+        const isEnded = now >= new Date(item.EndTime);
+        return {
+            maxEndedId: isEnded && item.Id > acc.maxEndedId ? item.Id : acc.maxEndedId,
+            maxAllId: item.Id > acc.maxAllId ? item.Id : acc.maxAllId,
+        };
+    }, { maxEndedId: 0, maxAllId: 0 });
+
+    const finalRawFEId = latestRawFEId.maxEndedId > 0 
+        ? latestRawFEId.maxEndedId + 1 
+        : latestRawFEId.maxAllId;
+
+    const latestSeasonFEId = finalRawFEId % ACTIVITY_ID_MODULUS;
 
     BB_SEASON = currentSeasonBBId ? `bb${currentSeasonBBId}` : BB_SEASON;
     FE_SEASON = latestSeasonFEId ? `fe${latestSeasonFEId}` : FE_SEASON;
 
     console.log(`Latest seasons - BB: ${BB_SEASON}, FE: ${FE_SEASON}`);
-    fs.writeFileSync(path.join(__dirname, 'season.json'), JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4), { encoding: 'utf8' });
+    fs.writeFileSync(
+        path.join(__dirname, 'season.json'), 
+        JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4), 
+        { encoding: 'utf8' }
+    );
     return [BB_SEASON, FE_SEASON]
 }
 
