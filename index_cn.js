@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const protobuf = require('protobufjs');
 let { BB_SEASON, FE_SEASON } = require('./season.json');
-const { CN: {SDK_VERSION_CN, SDK_URL_CN, SERVER_URL_CN, SERVER_GARBLE_KEY_CN } } = require('./config.json')
+const { CN: { CN_GAME_VERSION, CN_SDK_VERSION, CN_SDK_URL, CN_SERVER_URL, CN_SERVER_GARBLE_KEY } } = require('./config.json')
 
 const ENV_FILE = path.join(__dirname, '.env');
 if (fs.existsSync(ENV_FILE)) {
@@ -21,12 +21,12 @@ const POTENTIAL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData
 const SCOREBOSSCONTROL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/ScoreBossControl.json';
 const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/StarTowerBuildRank.json';
 
-const VERSION = '727.727.727.7272727';
+const VERSION = CN_GAME_VERSION || '727.727.727.7272727';
 
-const SDK_VERSION_CN = SDK_VERSION_CN || '1.16.0';
-const SDK_URL_CN = SDK_URL_CN || 'https://sdk-api.yostar.cn';
-const SERVER_URL_CN = SERVER_URL_CN ||'https://nova.yostar.cn';
-const SERVER_GARBLE_KEY_CN = Buffer.from(SERVER_GARBLE_KEY_CN || 'QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV', 'ascii');
+const SDK_VERSION_CN = CN_SDK_VERSION || '1.16.0';
+const SDK_URL_CN = CN_SDK_URL || 'https://sdk-api.yostar.cn';
+const SERVER_URL_CN = CN_SERVER_URL || 'https://nova.yostar.cn';
+const SERVER_GARBLE_KEY_CN = Buffer.from(CN_SERVER_GARBLE_KEY || 'QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV', 'ascii');
 
 const DEVICE_CN = process.env.DEVICE_CN;
 const TOKEN_CN = process.env.TOKEN_CN;
@@ -444,7 +444,7 @@ function generateYostarAuthHeader_CN(head = {}, body = {}, privateKeyPem = PRIVA
 async function quickLogin_CN(savedToken, sdkUrl = SDK_URL_CN, headOverrides = {}) {
     const url = sdkUrl + '/user/quick-login';
     const authHeader = generateYostarAuthHeader_CN(Object.assign({}), {});
-    const respBuf = await postBuffer(url, Buffer.from('{}'), { 'Content-Type': 'application/json', 'Authorization': authHeader});
+    const respBuf = await postBuffer(url, Buffer.from('{}'), { 'Content-Type': 'application/json', 'Authorization': authHeader });
     let txt = '';
     txt = respBuf.toString('utf8');
     let obj = null;
@@ -694,17 +694,17 @@ async function getLatestSeason_CN(params) {
     const ACTIVITY_ID_MODULUS = 510000;
     const JOINT_DRILL_ACTIVITY_TYPE = 7;
     const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
-    
+
     const [activityData, scoreBossControlData] = await Promise.all([
         fetch(ACTIVITY_URL).then(res => res.json()),
         fetch(SCOREBOSSCONTROL_URL).then(res => res.json())
     ]);
-    
+
     const currentSeasonBBId = Object.values(scoreBossControlData).find(item =>
         now >= new Date(item.StartTime) && now < new Date(item.EndTime)
     )?.Id;
 
-    const activityJointDrills = Object.values(activityData).filter(item => 
+    const activityJointDrills = Object.values(activityData).filter(item =>
         item.ActivityType === JOINT_DRILL_ACTIVITY_TYPE
     );
 
@@ -716,8 +716,8 @@ async function getLatestSeason_CN(params) {
         };
     }, { maxEndedId: 0, maxAllId: 0 });
 
-    const finalRawFEId = latestRawFEId.maxEndedId > 0 
-        ? latestRawFEId.maxEndedId + 1 
+    const finalRawFEId = latestRawFEId.maxEndedId > 0
+        ? latestRawFEId.maxEndedId + 1
         : latestRawFEId.maxAllId;
 
     const latestSeasonFEId = finalRawFEId % ACTIVITY_ID_MODULUS;
@@ -727,8 +727,8 @@ async function getLatestSeason_CN(params) {
 
     console.log(`Latest seasons - BB: ${BB_SEASON}, FE: ${FE_SEASON}`);
     fs.writeFileSync(
-        path.join(__dirname, 'season.json'), 
-        JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4), 
+        path.join(__dirname, 'season.json'),
+        JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4),
         { encoding: 'utf8' }
     );
     return [BB_SEASON, FE_SEASON]
@@ -761,7 +761,7 @@ async function getLatestSeason_CN(params) {
 
         console.log('Sending player login request (CN)...');
         const loginRespCn = await doPlayerLogin_CN(tokenCNIke, cipherCN, sessionKeyCN, accountLoginTokenCn, accountUidCn, SERVER_URL_CN, SERVER_GARBLE_KEY_CN, { version: VERSION, language: 'zh_CN', device: DEVICE_CN });
-  
+
         const newTokenCN = loginRespCn.Token;
 
         console.log('Requesting ScoreBossRank (CN)...');
