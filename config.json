@@ -1,5 +1,9 @@
 {
-    "GAME_VERSION": "727.727.727.7272727",
-    "SDK_VERSION": "1.14.4",
-    "SDK_URL_CN": "https://sdk-api.yostar.cn"
+    "CN": {
+        "GAME_VERSION_CN": "727.727.727.7272727",
+        "SDK_VERSION_CN": "1.16.0",
+        "SDK_URL_CN": "https://sdk-api.yostar.cn",
+        "SERVER_URL_CN": "https://nova.yostar.cn",
+        "SERVER_GARBLE_KEY_CN": "QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV"
+    }
 }
