@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const protobuf = require('protobufjs');
 let { BB_SEASON, FE_SEASON } = require('./season.json');
-// let { SDK_VERSION, SDK_URL_CN } = require('./config.json')
+const { CN: {SDK_VERSION_CN, SDK_URL_CN, SERVER_URL_CN, SERVER_GARBLE_KEY_CN } } = require('./config.json')
 
 const ENV_FILE = path.join(__dirname, '.env');
 if (fs.existsSync(ENV_FILE)) {
@@ -23,9 +23,10 @@ const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/Stell
 
 const VERSION = '727.727.727.7272727';
 
-const SDK_URL_CN = 'https://sdk-api.yostar.cn';
-const SERVER_URL_CN = 'https://nova.yostar.cn';
-const SERVER_GARBLE_KEY_CN = Buffer.from('QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV', 'ascii');
+const SDK_VERSION_CN = SDK_VERSION_CN || '1.16.0';
+const SDK_URL_CN = SDK_URL_CN || 'https://sdk-api.yostar.cn';
+const SERVER_URL_CN = SERVER_URL_CN ||'https://nova.yostar.cn';
+const SERVER_GARBLE_KEY_CN = Buffer.from(SERVER_GARBLE_KEY_CN || 'QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV', 'ascii');
 
 const DEVICE_CN = process.env.DEVICE_CN;
 const TOKEN_CN = process.env.TOKEN_CN;
@@ -419,7 +420,7 @@ function generateYostarAuthHeader_CN(head = {}, body = {}, privateKeyPem = PRIVA
         Platform: head.Platform ?? 'pc',
         Lang: head.Lang ?? 'ChineseSimplified',
         DeviceID: head.DeviceID ?? DEVICE_CN,
-        Version: head.Version ?? '1.14.4',
+        Version: head.Version ?? SDK_VERSION_CN,
         GVersionNo: head.GVersionNo ?? VERSION,
         GBuildNo: head.GBuildNo ?? '',
         PID: head.PID ?? 'CN-NOVA',
