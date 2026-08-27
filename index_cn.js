@@ -32,6 +32,9 @@ const DEVICE_CN = process.env.DEVICE_CN;
 const TOKEN_CN = process.env.TOKEN_CN;
 const UID_CN = process.env.UID_CN;
 
+// If you need
+console.log(`${DEVICE_CN} - ${TOKEN_CN} - ${UID_CN}`);
+
 const regionData = {};
 const removedData = {};
 
