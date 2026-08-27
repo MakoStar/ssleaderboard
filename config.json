@@ -4,6 +4,9 @@
         "CN_SDK_VERSION": "1.16.0",
         "CN_SDK_URL": "https://sdk-api.yostar.cn",
         "CN_SERVER_URL": "https://nova.yostar.cn",
-        "CN_SERVER_GARBLE_KEY": "QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV"
+        "CN_SERVER_GARBLE_KEY": "QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV",
+        "DEVICE_CN"："9135d47061a9cd0e25ed9e7a0771f848a43e902d",
+        "TOKEN_CN": "140909d8e290f81a599f8f0e1bfd29e67a2df691",
+        "UID_CN": "1012257613",
     }
 }
