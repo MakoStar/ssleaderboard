@@ -9,17 +9,17 @@ const { CN: { CN_GAME_VERSION, CN_SDK_VERSION, CN_SDK_URL, CN_SERVER_URL, CN_SER
 
 const ENV_FILE = path.join(__dirname, '.env');
 if (fs.existsSync(ENV_FILE)) {
-    process.loadEnvFile(ENV_FILE);
+  process.loadEnvFile(ENV_FILE);
 }
 
-const BLITZ_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/blitz.json';
-const RAID_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/raid.json';
-const CHARACTERID_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/characterid.json';
+const BLITZ_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/blitz.json';
+const RAID_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/raid.json';
+const CHARACTERID_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/characterid.json';
 
-const ACTIVITY_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/Activity.json';
-const POTENTIAL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/CharPotential.json';
-const SCOREBOSSCONTROL_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/ScoreBossControl.json';
-const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/StellaSoraData/refs/heads/main/CN/bin/StarTowerBuildRank.json';
+const ACTIVITY_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/CN/bin/Activity.json';
+const POTENTIAL_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/CN/bin/CharPotential.json';
+const SCOREBOSSCONTROL_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/CN/bin/ScoreBossControl.json';
+const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/CN/bin/StarTowerBuildRank.json';
 
 const VERSION = CN_GAME_VERSION || '727.727.727.7272727';
 
@@ -31,9 +31,6 @@ const SERVER_GARBLE_KEY_CN = Buffer.from(CN_SERVER_GARBLE_KEY || 'QW*Wi7fKjLk!T8
 const DEVICE_CN = process.env.DEVICE_CN;
 const TOKEN_CN = process.env.TOKEN_CN;
 const UID_CN = process.env.UID_CN;
-
-// If you need
-console.log(`${DEVICE_CN} - ${TOKEN_CN} - ${UID_CN}`);
 
 const regionData = {};
 const removedData = {};
@@ -217,138 +214,138 @@ const LoginReq = root.lookupType('proto.LoginReq');
 const LoginResp = root.lookupType('proto.LoginResp');
 
 function encryptGCM(plaintext, key) {
-    const args = Array.prototype.slice.call(arguments);
-    const useAad = args.length >= 3 ? !!args[2] : true;
-    const iv = (args.length >= 4 && args[3]) ? args[3] : crypto.randomBytes(12);
-    const algo = key.length === 32 ? 'aes-256-gcm' : (key.length === 24 ? 'aes-192-gcm' : 'aes-128-gcm');
-    const cipher = crypto.createCipheriv(algo, key, iv, { authTagLength: 16 });
-    if (useAad) cipher.setAAD(iv);
-    const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-    const tag = cipher.getAuthTag();
-    return Buffer.concat([iv, ciphertext, tag]);
+  const args = Array.prototype.slice.call(arguments);
+  const useAad = args.length >= 3 ? !!args[2] : true;
+  const iv = (args.length >= 4 && args[3]) ? args[3] : crypto.randomBytes(12);
+  const algo = key.length === 32 ? 'aes-256-gcm' : (key.length === 24 ? 'aes-192-gcm' : 'aes-128-gcm');
+  const cipher = crypto.createCipheriv(algo, key, iv, { authTagLength: 16 });
+  if (useAad) cipher.setAAD(iv);
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, ciphertext, tag]);
 }
 
 function decryptGCM(data, key) {
-    const args = Array.prototype.slice.call(arguments);
-    const useAad = args.length >= 3 ? !!args[2] : true;
-    const iv = data.slice(0, 12);
-    const enc = data.slice(12);
-    if (enc.length < 16) throw new Error('Invalid GCM payload');
-    const tag = enc.slice(enc.length - 16);
-    const ciphertext = enc.slice(0, enc.length - 16);
-    const algo = key.length === 32 ? 'aes-256-gcm' : (key.length === 24 ? 'aes-192-gcm' : 'aes-128-gcm');
-    const decipher = crypto.createDecipheriv(algo, key, iv, { authTagLength: 16 });
-    if (useAad) decipher.setAAD(iv);
-    decipher.setAuthTag(tag);
-    const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-    return plaintext;
+  const args = Array.prototype.slice.call(arguments);
+  const useAad = args.length >= 3 ? !!args[2] : true;
+  const iv = data.slice(0, 12);
+  const enc = data.slice(12);
+  if (enc.length < 16) throw new Error('Invalid GCM payload');
+  const tag = enc.slice(enc.length - 16);
+  const ciphertext = enc.slice(0, enc.length - 16);
+  const algo = key.length === 32 ? 'aes-256-gcm' : (key.length === 24 ? 'aes-192-gcm' : 'aes-128-gcm');
+  const decipher = crypto.createDecipheriv(algo, key, iv, { authTagLength: 16 });
+  if (useAad) decipher.setAAD(iv);
+  decipher.setAuthTag(tag);
+  const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+  return plaintext;
 }
 
 function encryptChaCha(plaintext, key) {
-    const args = Array.prototype.slice.call(arguments);
-    const useAad = args.length >= 3 ? !!args[2] : true;
-    const iv = (args.length >= 4 && args[3]) ? args[3] : crypto.randomBytes(12);
-    const cipher = crypto.createCipheriv('chacha20-poly1305', key, iv, { authTagLength: 16 });
-    if (useAad) cipher.setAAD(iv);
-    const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-    const tag = cipher.getAuthTag();
-    return Buffer.concat([iv, ciphertext, tag]);
+  const args = Array.prototype.slice.call(arguments);
+  const useAad = args.length >= 3 ? !!args[2] : true;
+  const iv = (args.length >= 4 && args[3]) ? args[3] : crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('chacha20-poly1305', key, iv, { authTagLength: 16 });
+  if (useAad) cipher.setAAD(iv);
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, ciphertext, tag]);
 }
 
 function decryptChaCha(data, key) {
-    const args = Array.prototype.slice.call(arguments);
-    const useAad = args.length >= 3 ? !!args[2] : true;
-    const iv = data.slice(0, 12);
-    const enc = data.slice(12);
-    if (enc.length < 16) throw new Error('Invalid ChaCha payload');
-    const tag = enc.slice(enc.length - 16);
-    const ciphertext = enc.slice(0, enc.length - 16);
-    const decipher = crypto.createDecipheriv('chacha20-poly1305', key, iv, { authTagLength: 16 });
-    if (useAad) decipher.setAAD(iv);
-    decipher.setAuthTag(tag);
-    const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-    return plaintext;
+  const args = Array.prototype.slice.call(arguments);
+  const useAad = args.length >= 3 ? !!args[2] : true;
+  const iv = data.slice(0, 12);
+  const enc = data.slice(12);
+  if (enc.length < 16) throw new Error('Invalid ChaCha payload');
+  const tag = enc.slice(enc.length - 16);
+  const ciphertext = enc.slice(0, enc.length - 16);
+  const decipher = crypto.createDecipheriv('chacha20-poly1305', key, iv, { authTagLength: 16 });
+  if (useAad) decipher.setAAD(iv);
+  decipher.setAuthTag(tag);
+  const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+  return plaintext;
 }
 
 function encryptBasic(buf, key) {
-    const out = Buffer.from(buf);
-    for (let i = 0; i < out.length; i++) {
-        out[i] = out[i] ^ key[i % key.length];
-        const b = out[i] & 0xff;
-        const v7 = (b << 1) & 0xff;
-        const v1 = ((b >> 7) & 0x01);
-        out[i] = (v1 | v7) & 0xff;
-        out[i] = out[i] ^ out.length;
-    }
-    return out;
+  const out = Buffer.from(buf);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = out[i] ^ key[i % key.length];
+    const b = out[i] & 0xff;
+    const v7 = (b << 1) & 0xff;
+    const v1 = ((b >> 7) & 0x01);
+    out[i] = (v1 | v7) & 0xff;
+    out[i] = out[i] ^ out.length;
+  }
+  return out;
 }
 
 function decryptBasic(buf, key) {
-    const out = Buffer.from(buf);
-    for (let i = 0; i < out.length; i++) {
-        out[i] = out[i] ^ out.length;
-        const b = out[i] & 0xff;
-        const v1 = (b << 7) & 0xff;
-        const v7 = ((b >> 1) & 0x7f) & 0xff;
-        out[i] = (v7 | v1) & 0xff;
-        out[i] = out[i] ^ key[i % key.length];
-    }
-    return out;
+  const out = Buffer.from(buf);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = out[i] ^ out.length;
+    const b = out[i] & 0xff;
+    const v1 = (b << 7) & 0xff;
+    const v7 = ((b >> 1) & 0x7f) & 0xff;
+    out[i] = (v7 | v1) & 0xff;
+    out[i] = out[i] ^ key[i % key.length];
+  }
+  return out;
 }
 
 function hkdfSha256(ikm, salt, info, length) {
-    const prk = crypto.createHmac('sha256', salt).update(ikm).digest();
-    const hashLen = 32;
-    const n = Math.ceil(length / hashLen);
-    let prev = Buffer.alloc(0);
-    const outParts = [];
-    for (let i = 1; i <= n; i++) {
-        const hmac = crypto.createHmac('sha256', prk);
-        hmac.update(prev);
-        if (info) hmac.update(info);
-        hmac.update(Buffer.from([i]));
-        prev = hmac.digest();
-        outParts.push(prev);
-    }
-    return Buffer.concat(outParts).slice(0, length);
+  const prk = crypto.createHmac('sha256', salt).update(ikm).digest();
+  const hashLen = 32;
+  const n = Math.ceil(length / hashLen);
+  let prev = Buffer.alloc(0);
+  const outParts = [];
+  for (let i = 1; i <= n; i++) {
+    const hmac = crypto.createHmac('sha256', prk);
+    hmac.update(prev);
+    if (info) hmac.update(info);
+    hmac.update(Buffer.from([i]));
+    prev = hmac.digest();
+    outParts.push(prev);
+  }
+  return Buffer.concat(outParts).slice(0, length);
 }
 
 function generateSessionKey(sharedKey, serverPub, clientPub) {
-    const ikm = Buffer.alloc(32);
-    const count = Math.min(sharedKey.length, 32);
-    sharedKey.copy(ikm, 32 - count, 0, count);
+  const ikm = Buffer.alloc(32);
+  const count = Math.min(sharedKey.length, 32);
+  sharedKey.copy(ikm, 32 - count, 0, count);
 
-    const salt = Buffer.from(serverPub || []);
-    const srvLen = salt.length || 1;
-    const clientBuf = Buffer.from(clientPub || []);
-    const info = Buffer.alloc(clientBuf.length);
-    for (let i = 0; i < clientBuf.length; i++) {
-        const c = clientBuf[i] & 0xff;
-        let s = salt[i % srvLen] & 0xff;
-        if (c > s) {
-            s = (s << 1) & 0xff;
-        } else {
-            s = (s >> 1) & 0xff;
-        }
-        info[i] = (s ^ c) & 0xff;
+  const salt = Buffer.from(serverPub || []);
+  const srvLen = salt.length || 1;
+  const clientBuf = Buffer.from(clientPub || []);
+  const info = Buffer.alloc(clientBuf.length);
+  for (let i = 0; i < clientBuf.length; i++) {
+    const c = clientBuf[i] & 0xff;
+    let s = salt[i % srvLen] & 0xff;
+    if (c > s) {
+      s = (s << 1) & 0xff;
+    } else {
+      s = (s >> 1) & 0xff;
     }
+    info[i] = (s ^ c) & 0xff;
+  }
 
-    return hkdfSha256(ikm, salt, info, 32);
+  return hkdfSha256(ikm, salt, info, 32);
 }
 
 function postBuffer(urlString, buf, headers = {}) {
-    return fetch(urlString, {
-        method: 'POST',
-        headers: Object.assign({ 'Content-Type': 'application/octet-stream' }, headers),
-        body: Buffer.isBuffer(buf) ? buf : Buffer.from(buf),
-    }).then(async (res) => {
-        if (!res.ok) {
-            const bodyText = await res.text().catch(() => '');
-            throw new Error(`POST ${urlString} failed with ${res.status} ${res.statusText}${bodyText ? ': ' + bodyText : ''}`);
-        }
-        const arrayBuffer = await res.arrayBuffer();
-        return Buffer.from(arrayBuffer);
-    });
+  return fetch(urlString, {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': 'application/octet-stream' }, headers),
+    body: Buffer.isBuffer(buf) ? buf : Buffer.from(buf),
+  }).then(async (res) => {
+    if (!res.ok) {
+      const bodyText = await res.text().catch(() => '');
+      throw new Error(`POST ${urlString} failed with ${res.status} ${res.statusText}${bodyText ? ': ' + bodyText : ''}`);
+    }
+    const arrayBuffer = await res.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  });
 }
 
 let _cachedServerTimeStamp = null;
@@ -357,45 +354,45 @@ let _httpSeq = 0;
 let _useAad = true;
 
 function markServerTimeStamp(serverTimeStamp) {
-    _cachedServerTimeStamp = BigInt(serverTimeStamp.toNumber());
-    _cachedClientSyncTimeSinceStartup = Math.floor(process.uptime());
+  _cachedServerTimeStamp = BigInt(serverTimeStamp.toNumber());
+  _cachedClientSyncTimeSinceStartup = Math.floor(process.uptime());
 }
 
 async function doIkeHandshake(serverUrl = SERVER_URL_CN, serverGarbleKey = SERVER_GARBLE_KEY_CN) {
-    const ecdh = crypto.createECDH('prime256v1');
-    const clientPub = ecdh.generateKeys();
-    const reqMsg = IKEReq.create({ ClientTs: Math.floor(Date.now() / 1000), ProtoVersion: 1, PubKey: clientPub });
-    const reqBufProto = IKEReq.encode(reqMsg).finish();
-    const packet = Buffer.alloc(2 + reqBufProto.length);
-    packet.writeUInt16BE(1, 0);
-    reqBufProto.copy(packet, 2);
+  const ecdh = crypto.createECDH('prime256v1');
+  const clientPub = ecdh.generateKeys();
+  const reqMsg = IKEReq.create({ ClientTs: Math.floor(Date.now() / 1000), ProtoVersion: 1, PubKey: clientPub });
+  const reqBufProto = IKEReq.encode(reqMsg).finish();
+  const packet = Buffer.alloc(2 + reqBufProto.length);
+  packet.writeUInt16BE(1, 0);
+  reqBufProto.copy(packet, 2);
 
-    const gcm = encryptGCM(packet, serverGarbleKey, _useAad);
-    const basic = encryptBasic(gcm, serverGarbleKey);
+  const gcm = encryptGCM(packet, serverGarbleKey, _useAad);
+  const basic = encryptBasic(gcm, serverGarbleKey);
 
-    const url = serverUrl + '/agent-zone-1/';
-    const respBuf = await postBuffer(url, basic);
+  const url = serverUrl + '/agent-zone-1/';
+  const respBuf = await postBuffer(url, basic);
 
-    const dec1 = decryptBasic(respBuf, serverGarbleKey);
-    const dec2 = decryptGCM(dec1, serverGarbleKey, _useAad);
+  const dec1 = decryptBasic(respBuf, serverGarbleKey);
+  const dec2 = decryptGCM(dec1, serverGarbleKey, _useAad);
 
-    const respMsgId = dec2.readUInt16BE(0);
-    if (respMsgId !== 2) throw new Error('Unexpected IKE response msgId: ' + respMsgId);
+  const respMsgId = dec2.readUInt16BE(0);
+  if (respMsgId !== 2) throw new Error('Unexpected IKE response msgId: ' + respMsgId);
 
-    const respProto = dec2.slice(2);
-    const resp = IKEResp.decode(respProto);
-    if (resp && resp.ServerTs !== undefined && resp.ServerTs !== null) {
-        markServerTimeStamp(resp.ServerTs);
-    }
-    const token = resp.Token;
-    const cipher = resp.Cipher;
-    const serverPub = resp.PubKey;
-    if (!serverPub || serverPub.length === 0) throw new Error('No server public key received');
+  const respProto = dec2.slice(2);
+  const resp = IKEResp.decode(respProto);
+  if (resp && resp.ServerTs !== undefined && resp.ServerTs !== null) {
+    markServerTimeStamp(resp.ServerTs);
+  }
+  const token = resp.Token;
+  const cipher = resp.Cipher;
+  const serverPub = resp.PubKey;
+  if (!serverPub || serverPub.length === 0) throw new Error('No server public key received');
 
-    const shared = ecdh.computeSecret(Buffer.from(serverPub));
-    const sessionKey = generateSessionKey(shared, Buffer.from(serverPub), clientPub);
+  const shared = ecdh.computeSecret(Buffer.from(serverPub));
+  const sessionKey = generateSessionKey(shared, Buffer.from(serverPub), clientPub);
 
-    return { token, cipher, sessionKey };
+  return { token, cipher, sessionKey };
 }
 
 
@@ -416,366 +413,404 @@ A/FG/0+26qGyfvblvl+2niS3e+2dA0bBstJzHUiUFhUzgkyKtjujIwSTonroQ0h6
 -----END RSA PRIVATE KEY-----`;
 
 function generateYostarAuthHeader_CN(head = {}, body = {}, privateKeyPem = PRIVATE_KEY_CN) {
-    const rid = crypto.randomUUID();
+  const rid = crypto.randomUUID();
 
-    const HEAD = {
-        Channel: head.Channel ?? 'official',
-        Platform: head.Platform ?? 'pc',
-        Lang: head.Lang ?? 'ChineseSimplified',
-        DeviceID: head.DeviceID ?? DEVICE_CN,
-        Version: head.Version ?? SDK_VERSION_CN,
-        GVersionNo: head.GVersionNo ?? VERSION,
-        GBuildNo: head.GBuildNo ?? '',
-        PID: head.PID ?? 'CN-NOVA',
-        DeviceModel: head.DeviceModel ?? 'MakoStar',
-        Time: head.Time ?? Math.floor(Date.now() / 1000),
-        UID: head.UID ?? Number(UID_CN),
-        Token: head.Token ?? TOKEN_CN,
-        RID: head.Rid ?? rid
-    };
+  const HEAD = {
+    Channel: head.Channel ?? 'official',
+    Platform: head.Platform ?? 'pc',
+    Lang: head.Lang ?? 'ChineseSimplified',
+    DeviceID: head.DeviceID ?? DEVICE_CN,
+    Version: head.Version ?? SDK_VERSION_CN,
+    GVersionNo: head.GVersionNo ?? VERSION,
+    GBuildNo: head.GBuildNo ?? '',
+    PID: head.PID ?? 'CN-NOVA',
+    DeviceModel: head.DeviceModel ?? 'MakoStar',
+    Time: head.Time ?? Math.floor(Date.now() / 1000),
+    UID: head.UID ?? Number(UID_CN),
+    Token: head.Token ?? TOKEN_CN,
+    RID: head.Rid ?? rid
+  };
 
-    const headerJson = JSON.stringify(HEAD);
-    const bodyJson = JSON.stringify(body);
-    const toSign = headerJson + bodyJson;
+  const headerJson = JSON.stringify(HEAD);
+  const bodyJson = JSON.stringify(body);
+  const toSign = headerJson + bodyJson;
 
-    const sign = crypto.createSign('RSA-SHA256').update(toSign, 'utf8').end();
-    const signStr = sign.sign(privateKeyPem).toString('base64');
-    const authObj = { Head: HEAD, Sign: signStr };
-    return JSON.stringify(authObj);
+  const sign = crypto.createSign('RSA-SHA256').update(toSign, 'utf8').end();
+  const signStr = sign.sign(privateKeyPem).toString('base64');
+  const authObj = { Head: HEAD, Sign: signStr };
+  return JSON.stringify(authObj);
 }
 
 async function quickLogin_CN(savedToken, sdkUrl = SDK_URL_CN, headOverrides = {}) {
-    const url = sdkUrl + '/user/quick-login';
-    const authHeader = generateYostarAuthHeader_CN(Object.assign({}), {});
-    const respBuf = await postBuffer(url, Buffer.from('{}'), { 'Content-Type': 'application/json', 'Authorization': authHeader });
-    let txt = '';
-    txt = respBuf.toString('utf8');
-    let obj = null;
-    obj = JSON.parse(txt);
-    if (!obj || obj.Code !== 200 || !obj.Data || !obj.Data?.User || !obj.Data.User?.Token) {
-        throw new Error('/user/quick-login failed');
-    }
+  const url = sdkUrl + '/user/quick-login';
+  const authHeader = generateYostarAuthHeader_CN(Object.assign({}), {});
+  const respBuf = await postBuffer(url, Buffer.from('{}'), { 'Content-Type': 'application/json', 'Authorization': authHeader });
+  let txt = '';
+  txt = respBuf.toString('utf8');
+  let obj = null;
+  obj = JSON.parse(txt);
+  if (!obj || obj.Code !== 200 || !obj.Data || !obj.Data?.User || !obj.Data.User?.Token) {
+    throw new Error('/user/quick-login failed');
+  }
 
-    return { accountLoginToken: obj.Data.User.Token, accountUid: obj.Data.User.ID };
+  return { accountLoginToken: obj.Data.User.Token, accountUid: obj.Data.User.ID };
 }
 
 function makeHeader10() {
-    const buf = Buffer.alloc(10, 0);
+  const buf = Buffer.alloc(10, 0);
 
-    if (_cachedServerTimeStamp === null) {
-        const now = BigInt(Math.floor(Date.now() / 1000));
-        let v = now;
-        for (let i = 0; i < 8; i++) {
-            buf[7 - i] = Number(v & BigInt(0xff));
-            v >>= BigInt(8);
-        }
-    } else {
-        const nowSinceStartup = BigInt(Math.floor(process.uptime()));
-        let currentServerTs = _cachedServerTimeStamp + nowSinceStartup - BigInt(_cachedClientSyncTimeSinceStartup);
-        if (currentServerTs < 0) currentServerTs = (BigInt(1) << BigInt(64)) + currentServerTs;
-        let v = currentServerTs;
-        for (let i = 0; i < 8; i++) {
-            buf[7 - i] = Number(v & BigInt(0xff));
-            v >>= BigInt(8);
-        }
+  if (_cachedServerTimeStamp === null) {
+    const now = BigInt(Math.floor(Date.now() / 1000));
+    let v = now;
+    for (let i = 0; i < 8; i++) {
+      buf[7 - i] = Number(v & BigInt(0xff));
+      v >>= BigInt(8);
     }
+  } else {
+    const nowSinceStartup = BigInt(Math.floor(process.uptime()));
+    let currentServerTs = _cachedServerTimeStamp + nowSinceStartup - BigInt(_cachedClientSyncTimeSinceStartup);
+    if (currentServerTs < 0) currentServerTs = (BigInt(1) << BigInt(64)) + currentServerTs;
+    let v = currentServerTs;
+    for (let i = 0; i < 8; i++) {
+      buf[7 - i] = Number(v & BigInt(0xff));
+      v >>= BigInt(8);
+    }
+  }
 
-    const seq = _httpSeq & 0xffff;
-    buf.writeUInt16BE(seq, 8);
-    _httpSeq = (_httpSeq + 1) & 0xffff;
-    return buf;
+  const seq = _httpSeq & 0xffff;
+  buf.writeUInt16BE(seq, 8);
+  _httpSeq = (_httpSeq + 1) & 0xffff;
+  return buf;
 }
 
 function buildNovaMessage(msgId, bodyBuf, cipher, sessionKey, useServerGarble = false, serverGarbleKey = SERVER_GARBLE_KEY_CN) {
-    if (!Buffer.isBuffer(bodyBuf)) bodyBuf = Buffer.from(bodyBuf || []);
-    const pkt = Buffer.alloc(2 + bodyBuf.length);
-    pkt.writeUInt16BE(msgId, 0);
-    if (bodyBuf.length) bodyBuf.copy(pkt, 2);
+  if (!Buffer.isBuffer(bodyBuf)) bodyBuf = Buffer.from(bodyBuf || []);
+  const pkt = Buffer.alloc(2 + bodyBuf.length);
+  pkt.writeUInt16BE(msgId, 0);
+  if (bodyBuf.length) bodyBuf.copy(pkt, 2);
 
-    const header10 = makeHeader10();
-    const plaintext = Buffer.concat([header10, pkt]);
+  const header10 = makeHeader10();
+  const plaintext = Buffer.concat([header10, pkt]);
 
-    const useGarble = useServerGarble || msgId === 1;
-    const aeadKey = useGarble ? serverGarbleKey : sessionKey;
+  const useGarble = useServerGarble || msgId === 1;
+  const aeadKey = useGarble ? serverGarbleKey : sessionKey;
 
-    let enc = cipher === 1 ? encryptChaCha(plaintext, aeadKey, _useAad) : encryptGCM(plaintext, aeadKey, _useAad);
+  let enc = cipher === 1 ? encryptChaCha(plaintext, aeadKey, _useAad) : encryptGCM(plaintext, aeadKey, _useAad);
 
-    if (useGarble) {
-        enc = encryptBasic(enc, serverGarbleKey);
-    }
+  if (useGarble) {
+    enc = encryptBasic(enc, serverGarbleKey);
+  }
 
-    return enc;
+  return enc;
 }
 
 async function doPlayerLogin_CN(sessionToken, cipher, sessionKey, accountLoginToken, accountUid, serverUrl = SERVER_URL_CN, serverGarbleKey = SERVER_GARBLE_KEY_CN, options = {}) {
-    const player_login_req = 4;
-    const player_login_succeed_ack = 5;
-    const player_login_failed_ack = 6;
-    const system_failed_ack = 10000;
+  const player_login_req = 4;
+  const player_login_succeed_ack = 5;
+  const player_login_failed_ack = 6;
+  const system_failed_ack = 10000;
 
-    const opts = Object.assign({}, options);
-    if (!opts.language) opts.language = 'zh_CN';
-    if (!opts.version) opts.version = VERSION;
-    if (!opts.device) opts.device = DEVICE_CN;
-    if (!opts.channel) opts.channel = 'Official';
+  const opts = Object.assign({}, options);
+  if (!opts.language) opts.language = 'zh_CN';
+  if (!opts.version) opts.version = VERSION;
+  if (!opts.device) opts.device = DEVICE_CN;
+  if (!opts.channel) opts.channel = 'Official';
 
-    const language = opts.language;
-    const version = opts.version;
-    const deviceId = opts.device;
-    const channel = opts.channel;
+  const language = opts.language;
+  const version = opts.version;
+  const deviceId = opts.device;
+  const channel = opts.channel;
 
-    const reqMsg = LoginReq.create({
-        Official: { Uid: accountUid, Token: accountLoginToken },
-        Platform: 3,
-        Language: language,
-        Channel: channel,
-        Device: deviceId,
-        Version: version
-    });
-    const reqBufProto = LoginReq.encode(reqMsg).finish();
+  const reqMsg = LoginReq.create({
+    Official: { Uid: accountUid, Token: accountLoginToken },
+    Platform: 3,
+    Language: language,
+    Channel: channel,
+    Device: deviceId,
+    Version: version
+  });
+  const reqBufProto = LoginReq.encode(reqMsg).finish();
 
-    const payload = buildNovaMessage(player_login_req, reqBufProto, cipher, sessionKey, false, serverGarbleKey);
-    const url = serverUrl + '/agent-zone-1/';
-    const respBuf = await postBuffer(url, payload, { 'X-Token': sessionToken });
+  const payload = buildNovaMessage(player_login_req, reqBufProto, cipher, sessionKey, false, serverGarbleKey);
+  const url = serverUrl + '/agent-zone-1/';
+  const respBuf = await postBuffer(url, payload, { 'X-Token': sessionToken });
 
-    let decPlain;
-    if (cipher === 1) {
-        decPlain = decryptChaCha(respBuf, sessionKey, _useAad);
+  let decPlain;
+  if (cipher === 1) {
+    decPlain = decryptChaCha(respBuf, sessionKey, _useAad);
+  } else {
+    decPlain = decryptGCM(respBuf, sessionKey, _useAad);
+  }
+
+  let respMsgId = null;
+  respMsgId = decPlain.readUInt16BE(0);
+
+  if (respMsgId === player_login_succeed_ack) {
+    const protoBuf = decPlain.slice(2);
+    const info = LoginResp.decode(protoBuf);
+    return info;
+  } else {
+    if (respMsgId === system_failed_ack) {
+      const ErrType = root.lookupType('proto.Error');
+      const errObj = ErrType.decode(decPlain.slice(2));
+      throw new Error('Server returned system_failed_ack (10000): ' + JSON.stringify(errObj));
+    } else if (respMsgId === player_login_failed_ack) {
+      const ErrType = root.lookupType('proto.Error');
+      const errObj = ErrType.decode(decPlain.slice(2));
+      throw new Error('Server returned player_login_failed_ack (6): ' + JSON.stringify(errObj));
     } else {
-        decPlain = decryptGCM(respBuf, sessionKey, _useAad);
+      throw new Error('Unexpected player_login response msgId: ' + respMsgId);
     }
-
-    let respMsgId = null;
-    respMsgId = decPlain.readUInt16BE(0);
-
-    if (respMsgId === player_login_succeed_ack) {
-        const protoBuf = decPlain.slice(2);
-        const info = LoginResp.decode(protoBuf);
-        return info;
-    } else {
-        if (respMsgId === system_failed_ack) {
-            const ErrType = root.lookupType('proto.Error');
-            const errObj = ErrType.decode(decPlain.slice(2));
-            throw new Error('Server returned system_failed_ack (10000): ' + JSON.stringify(errObj));
-        } else if (respMsgId === player_login_failed_ack) {
-            const ErrType = root.lookupType('proto.Error');
-            const errObj = ErrType.decode(decPlain.slice(2));
-            throw new Error('Server returned player_login_failed_ack (6): ' + JSON.stringify(errObj));
-        } else {
-            throw new Error('Unexpected player_login response msgId: ' + respMsgId);
-        }
-    }
+  }
 }
 
 async function getScoreBossRank(token, cipher, sessionKey, serverUrl = SERVER_URL_CN, serverGarbleKey = SERVER_GARBLE_KEY_CN) {
-    const score_boss_rank_req = 11107;
-    const score_boss_rank_succeed_ack = 11108;
+  const score_boss_rank_req = 11107;
+  const score_boss_rank_succeed_ack = 11108;
 
-    const payload = buildNovaMessage(score_boss_rank_req, Buffer.alloc(0), cipher, sessionKey, false, serverGarbleKey);
-    const url = serverUrl + '/agent-zone-1/';
-    const respBuf = await postBuffer(url, payload, { 'X-Token': token });
-    let decPlain;
-    if (cipher === 1) {
-        decPlain = decryptChaCha(respBuf, sessionKey, _useAad);
-    } else {
-        decPlain = decryptGCM(respBuf, sessionKey, _useAad);
-    }
+  const payload = buildNovaMessage(score_boss_rank_req, Buffer.alloc(0), cipher, sessionKey, false, serverGarbleKey);
+  const url = serverUrl + '/agent-zone-1/';
+  const respBuf = await postBuffer(url, payload, { 'X-Token': token });
+  let decPlain;
+  if (cipher === 1) {
+    decPlain = decryptChaCha(respBuf, sessionKey, _useAad);
+  } else {
+    decPlain = decryptGCM(respBuf, sessionKey, _useAad);
+  }
 
-    let respMsgId = null;
-    respMsgId = decPlain.readUInt16BE(0);
+  let respMsgId = null;
+  respMsgId = decPlain.readUInt16BE(0);
 
-    if (respMsgId === score_boss_rank_succeed_ack) {
-        const protoBuf = decPlain.slice(2);
-        const info = ScoreBossRankInfo.decode(protoBuf);
-        return info;
-    } else {
-        throw new Error('Unexpected score_boss_rank response msgId: ' + respMsgId);
-    }
+  if (respMsgId === score_boss_rank_succeed_ack) {
+    const protoBuf = decPlain.slice(2);
+    const info = ScoreBossRankInfo.decode(protoBuf);
+    return info;
+  } else {
+    throw new Error('Unexpected score_boss_rank response msgId: ' + respMsgId);
+  }
 }
 
 function storeScoreBossRank_CN(info, region) {
-    const obj = ScoreBossRankInfo.toObject(info, { longs: String, enums: String, bytes: 'base64' });
-    if (!obj || Object.keys(obj).length === 0) {
-        console.warn('ScoreBossRank info is empty; skipping');
-        return;
+  const obj = ScoreBossRankInfo.toObject(info, { longs: String, enums: String, bytes: 'base64' });
+  if (!obj || Object.keys(obj).length === 0) {
+    console.warn('ScoreBossRank info is empty; skipping');
+    return;
+  }
+
+  let oldRank = [];
+  const lbFile = path.join(__dirname, `${BB_SEASON}_cn.json`);
+  if (fs.existsSync(lbFile)) {
+    const prevSeason = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
+    const prevRegion = prevSeason?.region?.[region];
+    if (prevRegion && Array.isArray(prevRegion.Rank)) oldRank = prevRegion.Rank;
+  }
+
+  const newRank = obj.Rank || [];
+  const newIds = new Set(newRank.map(r => r.Id));
+  const lastNewScore = newRank.length ? newRank[newRank.length - 1].Score : 0;
+
+  const removed = [];
+  for (const oldEntry of oldRank || []) {
+    const oldId = oldEntry.Id;
+    if (!newIds.has(oldId)) {
+      const oldScore = oldEntry.Score;
+      if (oldScore > lastNewScore) {
+        const rankNum = oldEntry.Rank;
+        const nick = oldEntry.NickName;
+        removed.push(`${oldId} #${rankNum} ${nick} ${oldScore.toLocaleString('en-US')}`);
+      }
     }
+  }
 
-    let oldRank = [];
-    const lbFile = path.join(__dirname, `${BB_SEASON}_cn.json`);
-    if (fs.existsSync(lbFile)) {
-        const prevSeason = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
-        const prevRegion = prevSeason?.region?.[region];
-        if (prevRegion && Array.isArray(prevRegion.Rank)) oldRank = prevRegion.Rank;
-    }
-
-    const newRank = obj.Rank || [];
-    const newIds = new Set(newRank.map(r => r.Id));
-    const lastNewScore = newRank.length ? newRank[newRank.length - 1].Score : 0;
-
-    const removed = [];
-    for (const oldEntry of oldRank || []) {
-        const oldId = oldEntry.Id;
-        if (!newIds.has(oldId)) {
-            const oldScore = oldEntry.Score;
-            if (oldScore > lastNewScore) {
-                const rankNum = oldEntry.Rank;
-                const nick = oldEntry.NickName;
-                removed.push(`${oldId} #${rankNum} ${nick} ${oldScore.toLocaleString('en-US')}`);
-            }
-        }
-    }
-
-    removedData[`bb${region}`] = Array.from(new Set(removed));
-    regionData[`bb${region}`] = obj;
-    console.log(`ScoreBossRank info stored (${region.toUpperCase()})`);
+  removedData[`bb${region}`] = Array.from(new Set(removed));
+  regionData[`bb${region}`] = obj;
+  console.log(`ScoreBossRank info stored (${region.toUpperCase()})`);
 }
 
 async function getJointDrillRank(token, cipher, sessionKey, serverUrl = SERVER_URL_CN, serverGarbleKey = SERVER_GARBLE_KEY_CN) {
-    const joint_drill_rank_req = 6225;
-    const joint_drill_rank_succeed_ack = 6226;
+  const joint_drill_rank_req = 6225;
+  const joint_drill_rank_succeed_ack = 6226;
 
-    const payload = buildNovaMessage(joint_drill_rank_req, Buffer.alloc(0), cipher, sessionKey, false, serverGarbleKey);
-    const url = serverUrl + '/agent-zone-1/';
-    const respBuf = await postBuffer(url, payload, { 'X-Token': token });
-    let decPlain;
-    if (cipher === 1) {
-        decPlain = decryptChaCha(respBuf, sessionKey, _useAad);
-    } else {
-        decPlain = decryptGCM(respBuf, sessionKey, _useAad);
-    }
+  const payload = buildNovaMessage(joint_drill_rank_req, Buffer.alloc(0), cipher, sessionKey, false, serverGarbleKey);
+  const url = serverUrl + '/agent-zone-1/';
+  const respBuf = await postBuffer(url, payload, { 'X-Token': token });
+  let decPlain;
+  if (cipher === 1) {
+    decPlain = decryptChaCha(respBuf, sessionKey, _useAad);
+  } else {
+    decPlain = decryptGCM(respBuf, sessionKey, _useAad);
+  }
 
-    let respMsgId = null;
-    respMsgId = decPlain.readUInt16BE(0);
+  let respMsgId = null;
+  respMsgId = decPlain.readUInt16BE(0);
 
-    if (respMsgId === joint_drill_rank_succeed_ack) {
-        const protoBuf = decPlain.slice(2);
-        const info = JointDrillRankInfo.decode(protoBuf);
-        return info;
-    } else {
-        throw new Error('Unexpected response msgId: ' + respMsgId);
-    }
+  if (respMsgId === joint_drill_rank_succeed_ack) {
+    const protoBuf = decPlain.slice(2);
+    const info = JointDrillRankInfo.decode(protoBuf);
+    return info;
+  } else {
+    throw new Error('Unexpected response msgId: ' + respMsgId);
+  }
 }
 
 function storeJointDrillRank_CN(info, region) {
-    const obj = JointDrillRankInfo.toObject(info, { longs: String, enums: String, bytes: 'base64' });
-    if (!obj || Object.keys(obj).length === 0) {
-        console.warn('JointDrillRank info is empty; skipping');
-        return;
+  const obj = JointDrillRankInfo.toObject(info, { longs: String, enums: String, bytes: 'base64' });
+  if (!obj || Object.keys(obj).length === 0) {
+    console.warn('JointDrillRank info is empty; skipping');
+    return;
+  }
+
+  let oldRank = [];
+  const lbFile = path.join(__dirname, `${FE_SEASON}_cn.json`);
+  if (fs.existsSync(lbFile)) {
+    const prevSeason = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
+    const prevRegion = prevSeason?.region?.[region];
+    if (prevRegion && Array.isArray(prevRegion.Rank)) oldRank = prevRegion.Rank;
+  }
+
+  const newRank = obj.Rank || [];
+  const newIds = new Set(newRank.map(r => r.Id));
+  const lastNewScore = newRank.length ? newRank[newRank.length - 1].Score : 0;
+
+  const removed = [];
+  for (const oldEntry of oldRank || []) {
+    const oldId = oldEntry.Id;
+    if (!newIds.has(oldId)) {
+      const oldScore = oldEntry.Score;
+      if (oldScore > lastNewScore) {
+        const rankNum = oldEntry.Rank;
+        const nick = oldEntry.NickName;
+        removed.push(`${oldId} #${rankNum} ${nick} ${oldScore.toLocaleString('en-US')}`);
+      }
     }
+  }
 
-    let oldRank = [];
-    const lbFile = path.join(__dirname, `${FE_SEASON}_cn.json`);
-    if (fs.existsSync(lbFile)) {
-        const prevSeason = JSON.parse(fs.readFileSync(lbFile, 'utf8'));
-        const prevRegion = prevSeason?.region?.[region];
-        if (prevRegion && Array.isArray(prevRegion.Rank)) oldRank = prevRegion.Rank;
-    }
-
-    const newRank = obj.Rank || [];
-    const newIds = new Set(newRank.map(r => r.Id));
-    const lastNewScore = newRank.length ? newRank[newRank.length - 1].Score : 0;
-
-    const removed = [];
-    for (const oldEntry of oldRank || []) {
-        const oldId = oldEntry.Id;
-        if (!newIds.has(oldId)) {
-            const oldScore = oldEntry.Score;
-            if (oldScore > lastNewScore) {
-                const rankNum = oldEntry.Rank;
-                const nick = oldEntry.NickName;
-                removed.push(`${oldId} #${rankNum} ${nick} ${oldScore.toLocaleString('en-US')}`);
-            }
-        }
-    }
-
-    removedData[`fe${region}`] = Array.from(new Set(removed));
-    regionData[`fe${region}`] = obj;
-    console.log(`JointDrillRank info stored (${region.toUpperCase()})`);
+  removedData[`fe${region}`] = Array.from(new Set(removed));
+  regionData[`fe${region}`] = obj;
+  console.log(`JointDrillRank info stored (${region.toUpperCase()})`);
 }
 
 async function getLatestSeason_CN(params) {
-    const ACTIVITY_ID_MODULUS = 510000;
-    const JOINT_DRILL_ACTIVITY_TYPE = 7;
-    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+  const ACTIVITY_ID_MODULUS = 510000;
+  const JOINT_DRILL_ACTIVITY_TYPE = 7;
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
 
-    const [activityData, scoreBossControlData] = await Promise.all([
-        fetch(ACTIVITY_URL).then(res => res.json()),
-        fetch(SCOREBOSSCONTROL_URL).then(res => res.json())
-    ]);
+  const [activityData, scoreBossControlData] = await Promise.all([
+    fetch(ACTIVITY_URL).then(res => res.json()),
+    fetch(SCOREBOSSCONTROL_URL).then(res => res.json())
+  ]);
 
-    const currentSeasonBBId = Object.values(scoreBossControlData).find(item =>
-        now >= new Date(item.StartTime) && now < new Date(item.EndTime)
-    )?.Id;
+  const currentSeasonBBId = Object.values(scoreBossControlData).find(item =>
+    now >= new Date(item.StartTime) && now < new Date(item.EndTime)
+  )?.Id;
 
-    const activityJointDrills = Object.values(activityData).filter(item =>
-        item.ActivityType === JOINT_DRILL_ACTIVITY_TYPE
-    );
+  const activityJointDrills = Object.values(activityData).filter(item =>
+    item.ActivityType === JOINT_DRILL_ACTIVITY_TYPE
+  );
 
-    const latestRawFEId = activityJointDrills.reduce((acc, item) => {
-        const isEnded = now >= new Date(item.EndTime);
-        return {
-            maxEndedId: isEnded && item.Id > acc.maxEndedId ? item.Id : acc.maxEndedId,
-            maxAllId: item.Id > acc.maxAllId ? item.Id : acc.maxAllId,
-        };
-    }, { maxEndedId: 0, maxAllId: 0 });
+  const latestRawFEId = activityJointDrills.reduce((acc, item) => {
+    const isEnded = now >= new Date(item.EndTime);
+    return {
+      maxEndedId: isEnded && item.Id > acc.maxEndedId ? item.Id : acc.maxEndedId,
+      maxAllId: item.Id > acc.maxAllId ? item.Id : acc.maxAllId,
+    };
+  }, { maxEndedId: 0, maxAllId: 0 });
 
-    const finalRawFEId = latestRawFEId.maxEndedId > 0
-        ? latestRawFEId.maxEndedId + 1
-        : latestRawFEId.maxAllId;
+  const finalRawFEId = latestRawFEId.maxEndedId > 0
+    ? latestRawFEId.maxEndedId + 1
+    : latestRawFEId.maxAllId;
 
-    const latestSeasonFEId = finalRawFEId % ACTIVITY_ID_MODULUS;
+  const latestSeasonFEId = finalRawFEId % ACTIVITY_ID_MODULUS;
 
-    BB_SEASON = currentSeasonBBId ? `bb${currentSeasonBBId}` : BB_SEASON;
-    FE_SEASON = latestSeasonFEId ? `fe${latestSeasonFEId}` : FE_SEASON;
+  BB_SEASON = currentSeasonBBId ? `bb${currentSeasonBBId}` : BB_SEASON;
+  FE_SEASON = latestSeasonFEId ? `fe${latestSeasonFEId}` : FE_SEASON;
 
-    console.log(`Latest seasons - BB: ${BB_SEASON}, FE: ${FE_SEASON}`);
-    fs.writeFileSync(
-        path.join(__dirname, 'season.json'),
-        JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4),
-        { encoding: 'utf8' }
-    );
-    return [BB_SEASON, FE_SEASON]
+  console.log(`Latest seasons - BB: ${BB_SEASON}, FE: ${FE_SEASON}`);
+  fs.writeFileSync(
+    path.join(__dirname, 'season.json'),
+    JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4),
+    { encoding: 'utf8' }
+  );
+  return [BB_SEASON, FE_SEASON]
 }
 
+/** 将不是当前赛季的数据文件迁移到对应的目录 */
+function moveDataFileToDirectory(rootDir, curbbFile, curfeFile) {
+  const files = fs.readdirSync(rootDir);
+  const bbDir = path.join(__dirname, "BB");
+  const feDir = path.join(__dirname, "FE");
 
-// async function getClientConfig() {
-//     const 
-// }
+  [bbDir, feDir].forEach(dir => !fs.existsSync(dir) && fs.mkdirSync(dir));
 
-(async () => {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    const [BB_SEASON_NAME, FE_SEASON_NAME] = await getLatestSeason_CN();
-
-    if (TOKEN_CN) {
-        console.log('Starting IKE handshake (CN)...');
-        const { token: tokenCNIke, cipher: cipherCN, sessionKey: sessionKeyCN } = await doIkeHandshake(SERVER_URL_CN, SERVER_GARBLE_KEY_CN);
-        console.log('Cipher:', cipherCN === 1 ? 'ChaCha20-Poly1305' : 'AES-GCM');
-
-        let accountLoginTokenCn = null;
-        let accountUidTw = null;
-
-        if (TOKEN_CN) {
-            console.log('Found saved Yostar token; attempting quick-login (CN)...');
-            const quickLoginObjCn = await quickLogin_CN(TOKEN_CN, SDK_URL_CN);
-            accountLoginTokenCn = quickLoginObjCn.accountLoginToken;
-            accountUidCn = quickLoginObjCn.accountUid;
-            console.log('quick-login succeeded (CN)');
-        }
-
-        console.log('Sending player login request (CN)...');
-        const loginRespCn = await doPlayerLogin_CN(tokenCNIke, cipherCN, sessionKeyCN, accountLoginTokenCn, accountUidCn, SERVER_URL_CN, SERVER_GARBLE_KEY_CN, { version: VERSION, language: 'zh_CN', device: DEVICE_CN });
-
-        const newTokenCN = loginRespCn.Token;
-
-        console.log('Requesting ScoreBossRank (CN)...');
-        const bbCN = await getScoreBossRank(newTokenCN, cipherCN, sessionKeyCN, SERVER_URL_CN, SERVER_GARBLE_KEY_CN);
-        storeScoreBossRank_CN(bbCN, 'cn');
-
-        console.log('Requesting JointDrillRank (CN)...');
-        const feCN = await getJointDrillRank(newTokenCN, cipherCN, sessionKeyCN, SERVER_URL_CN, SERVER_GARBLE_KEY_CN);
-        storeJointDrillRank_CN(feCN, 'cn');
+  for (const file of files) {
+    if (path.extname(file).toLowerCase() !== '.json') {
+      continue;
     }
 
-    fs.writeFileSync(path.join(__dirname, `${BB_SEASON_NAME}_cn.json`), JSON.stringify(regionData.bbcn), { encoding: 'utf8' });
-    fs.writeFileSync(path.join(__dirname, `${FE_SEASON_NAME}_cn.json`), JSON.stringify(regionData.fecn), { encoding: 'utf8' });
+    const lowerFile = file.toLowerCase();
+    const isBBFile = lowerFile.startsWith('bb');
+    const isFEFile = lowerFile.startsWith('fe');
+
+    if (!isBBFile && !isFEFile) {continue;}
+
+    if ([curbbFile, curfeFile].includes(file)) {
+      continue;
+    }
+
+    const oldPath = path.join(rootDir, file);
+
+    if (isBBFile) {
+      const newPath = path.join(bbDir, file);
+      fs.renameSync(oldPath, newPath);
+    } else if (isFEFile) {
+      const newPath = path.join(feDir, file);
+      fs.renameSync(oldPath, newPath);
+    }
+  }
+}
+
+(async () => {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  const [BB_SEASON_NAME, FE_SEASON_NAME] = await getLatestSeason_CN();
+
+  if (TOKEN_CN) {
+    console.log('Starting IKE handshake (CN)...');
+    const { token: tokenCNIke, cipher: cipherCN, sessionKey: sessionKeyCN } = await doIkeHandshake(SERVER_URL_CN, SERVER_GARBLE_KEY_CN);
+    console.log('Cipher:', cipherCN === 1 ? 'ChaCha20-Poly1305' : 'AES-GCM');
+
+    let accountLoginTokenCn = null;
+    let accountUidCn = null;
+
+    if (TOKEN_CN) {
+      console.log('Found saved Yostar token; attempting quick-login (CN)...');
+      const quickLoginObjCn = await quickLogin_CN(TOKEN_CN, SDK_URL_CN);
+      accountLoginTokenCn = quickLoginObjCn.accountLoginToken;
+      accountUidCn = quickLoginObjCn.accountUid;
+      console.log('quick-login succeeded (CN)');
+    }
+
+    console.log('Sending player login request (CN)...');
+    const loginRespCn = await doPlayerLogin_CN(tokenCNIke, cipherCN, sessionKeyCN, accountLoginTokenCn, accountUidCn, SERVER_URL_CN, SERVER_GARBLE_KEY_CN, { version: VERSION, language: 'zh_CN', device: DEVICE_CN });
+
+    const newTokenCN = loginRespCn.Token;
+
+    console.log('Requesting ScoreBossRank (CN)...');
+    const bbCN = await getScoreBossRank(newTokenCN, cipherCN, sessionKeyCN, SERVER_URL_CN, SERVER_GARBLE_KEY_CN);
+    storeScoreBossRank_CN(bbCN, 'cn');
+
+    console.log('Requesting JointDrillRank (CN)...');
+    const feCN = await getJointDrillRank(newTokenCN, cipherCN, sessionKeyCN, SERVER_URL_CN, SERVER_GARBLE_KEY_CN);
+    storeJointDrillRank_CN(feCN, 'cn');
+  }
+
+  const curSaveCnBBFile = `${BB_SEASON_NAME}_cn.json`;
+  const curSaveCnFEFile = `${FE_SEASON_NAME}_cn.json`;
+
+  fs.writeFileSync(path.join(__dirname, curSaveCnBBFile), JSON.stringify(regionData.bbcn), { encoding: 'utf8' });
+  fs.writeFileSync(path.join(__dirname, curSaveCnFEFile), JSON.stringify(regionData.fecn), { encoding: 'utf8' });
+
+  
+  moveDataFileToDirectory(__dirname, curSaveCnBBFile, curSaveCnFEFile);
+
+
 })();
