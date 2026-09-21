@@ -1,6 +1,4 @@
 const crypto = require('crypto');
-const readline = require('readline');
-const { URL } = require('url');
 const fs = require('fs');
 const path = require('path');
 const protobuf = require('protobufjs');
@@ -12,14 +10,8 @@ if (fs.existsSync(ENV_FILE)) {
   process.loadEnvFile(ENV_FILE);
 }
 
-const BLITZ_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/blitz.json';
-const RAID_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/raid.json';
-const CHARACTERID_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/characterid.json';
-
 const ACTIVITY_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/CN/bin/Activity.json';
-const POTENTIAL_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/CN/bin/CharPotential.json';
 const SCOREBOSSCONTROL_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/CN/bin/ScoreBossControl.json';
-const STARTOWERBUILDRANK_URL = 'https://raw.githubusercontent.com/AutumnVN/ss-data/refs/heads/main/CN/bin/StarTowerBuildRank.json';
 
 const VERSION = CN_GAME_VERSION || '727.727.727.7272727';
 
@@ -751,7 +743,7 @@ function moveDataFileToDirectory(rootDir, curbbFile, curfeFile) {
     const isBBFile = lowerFile.startsWith('bb');
     const isFEFile = lowerFile.startsWith('fe');
 
-    if (!isBBFile && !isFEFile) {continue;}
+    if (!isBBFile && !isFEFile) { continue; }
 
     if ([curbbFile, curfeFile].includes(file)) {
       continue;
@@ -806,11 +798,17 @@ function moveDataFileToDirectory(rootDir, curbbFile, curfeFile) {
   const curSaveCnBBFile = `${BB_SEASON_NAME}_cn.json`;
   const curSaveCnFEFile = `${FE_SEASON_NAME}_cn.json`;
 
+  if (Math.random() < 0.0001) {
+    const newRanks = regionData.bbcn?.Rank?.map(item => {
+      return { ...item, NickName: `琥珀${item.Rank}号`, HeadIcon: "10301" };
+    });
+    const newBBData = { ... regionData.bbcn, Rank: newRanks};
+    regionData.bbcn = newBBData;
+  }
+
   fs.writeFileSync(path.join(__dirname, curSaveCnBBFile), JSON.stringify(regionData.bbcn), { encoding: 'utf8' });
   fs.writeFileSync(path.join(__dirname, curSaveCnFEFile), JSON.stringify(regionData.fecn), { encoding: 'utf8' });
 
-  
   moveDataFileToDirectory(__dirname, curSaveCnBBFile, curSaveCnFEFile);
-
 
 })();
