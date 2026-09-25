@@ -717,7 +717,10 @@ async function getLatestSeason_CN(params) {
   BB_SEASON = currentSeasonBBId ? `bb${currentSeasonBBId}` : BB_SEASON;
   FE_SEASON = latestSeasonFEId ? `fe${latestSeasonFEId}` : FE_SEASON;
 
+  console.log('='.repeat(60));
   console.log(`Latest seasons - BB: ${BB_SEASON}, FE: ${FE_SEASON}`);
+  console.log('='.repeat(60));
+  
   fs.writeFileSync(
     path.join(__dirname, 'season.json'),
     JSON.stringify({ BB_SEASON, FE_SEASON }, null, 4),
@@ -726,13 +729,30 @@ async function getLatestSeason_CN(params) {
   return [BB_SEASON, FE_SEASON]
 }
 
-/** 将不是当前赛季的数据文件迁移到对应的目录 */
-function moveDataFileToDirectory(rootDir, curbbFile, curfeFile) {
-  const files = fs.readdirSync(rootDir);
+function moveDataFilesToDirectories(sourceDir, curBBFile, curFEFile) {
+  const files = fs.readdirSync(sourceDir);
   const bbDir = path.join(__dirname, "BB");
   const feDir = path.join(__dirname, "FE");
 
-  [bbDir, feDir].forEach(dir => !fs.existsSync(dir) && fs.mkdirSync(dir));
+  [bbDir, feDir].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+  });
+
+  const decrementVersion = s => s.replace(/(\d+)/, m => String(Number(m) - 1));
+  const preBBFile = decrementVersion(curBBFile);
+  const preFEFile = decrementVersion(curFEFile);
+
+  const keepFiles = [curBBFile, curFEFile, preBBFile, preFEFile];
+  const hasKeepFile = files.some(f => keepFiles.includes(f));
+
+  if (hasKeepFile) {
+    console.log('Moving data files to directory:', {
+      curBBFile, curFEFile,
+      preBBFile, preFEFile,
+    });
+  }
 
   for (const file of files) {
     if (path.extname(file).toLowerCase() !== '.json') {
@@ -743,13 +763,15 @@ function moveDataFileToDirectory(rootDir, curbbFile, curfeFile) {
     const isBBFile = lowerFile.startsWith('bb');
     const isFEFile = lowerFile.startsWith('fe');
 
-    if (!isBBFile && !isFEFile) { continue; }
-
-    if ([curbbFile, curfeFile].includes(file)) {
+    if (!isBBFile && !isFEFile) {
       continue;
     }
 
-    const oldPath = path.join(rootDir, file);
+    if (keepFiles.includes(file)) {
+      continue;
+    }
+
+    const oldPath = path.join(sourceDir, file);
 
     if (isBBFile) {
       const newPath = path.join(bbDir, file);
@@ -762,7 +784,8 @@ function moveDataFileToDirectory(rootDir, curbbFile, curfeFile) {
 }
 
 (async () => {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  if (!!!process.env.CI) process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
   const [BB_SEASON_NAME, FE_SEASON_NAME] = await getLatestSeason_CN();
 
   if (TOKEN_CN) {
@@ -798,17 +821,17 @@ function moveDataFileToDirectory(rootDir, curbbFile, curfeFile) {
   const curSaveCnBBFile = `${BB_SEASON_NAME}_cn.json`;
   const curSaveCnFEFile = `${FE_SEASON_NAME}_cn.json`;
 
-  if (Math.random() < 0.0001) {
-    const newRanks = regionData.bbcn?.Rank?.map(item => {
-      return { ...item, NickName: `琥珀${item.Rank}号`, HeadIcon: "10301" };
-    });
-    const newBBData = { ... regionData.bbcn, Rank: newRanks};
-    regionData.bbcn = newBBData;
-  }
+  // if (Math.random() < 0.0001) {
+  //   const newRanks = regionData.bbcn?.Rank?.map(item => {
+  //     return { ...item, NickName: `琥珀${item.Rank}号`, HeadIcon: "10301" };
+  //   });
+  //   const newBBData = { ... regionData.bbcn, Rank: newRanks};
+  //   regionData.bbcn = newBBData;
+  // }
 
   fs.writeFileSync(path.join(__dirname, curSaveCnBBFile), JSON.stringify(regionData.bbcn), { encoding: 'utf8' });
   fs.writeFileSync(path.join(__dirname, curSaveCnFEFile), JSON.stringify(regionData.fecn), { encoding: 'utf8' });
 
-  moveDataFileToDirectory(__dirname, curSaveCnBBFile, curSaveCnFEFile);
+  moveDataFilesToDirectories(__dirname, curSaveCnBBFile, curSaveCnFEFile);
 
 })();
