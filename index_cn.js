@@ -821,32 +821,6 @@ function moveDataFilesToDirectories(sourceDir, curBBFile, curFEFile) {
   const curSaveCnBBFile = `${BB_SEASON_NAME}_cn.json`;
   const curSaveCnFEFile = `${FE_SEASON_NAME}_cn.json`;
 
-  const dirtyWords = ['私募', '纹章', '扫b'];
-  /***/
-  // const newRanks = regionData.bbcn?.Rank?.map(item => {
-  //   const name = item.NickName;
-  //   return { ...item, NickName: `${name}是扫b` };
-  // });
-  // const newBBData = { ...regionData.bbcn, Rank: newRanks, Total: 114514 };
-  // regionData.bbcn = newBBData;
-  /***/
-  
-  // if (Math.random() < 0.001) {
-  //   const newRanks = regionData.bbcn?.Rank?.map(item => {
-  //     return { ...item, NickName: `琥珀${item.Rank}号`, HeadIcon: "10301" };
-  //   });
-  //   const newBBData = { ... regionData.bbcn, Rank: newRanks};
-  //   regionData.bbcn = newBBData;
-  // }
-
-  // if (Math.random() < 0.0001) {
-  //   const newRanks = regionData.bbcn?.Rank?.map(item => {
-  //     return { ...item, NickName: `御坂{item.Rank}号`, HeadIcon: "10301" };
-  //   });
-  //   const newBBData = { ... regionData.bbcn, Rank: newRanks};
-  //   regionData.bbcn = newBBData;
-  // }
-
   fs.writeFileSync(path.join(__dirname, curSaveCnBBFile), JSON.stringify(regionData.bbcn), { encoding: 'utf8' });
   fs.writeFileSync(path.join(__dirname, curSaveCnFEFile), JSON.stringify(regionData.fecn), { encoding: 'utf8' });
 
