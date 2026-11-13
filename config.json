@@ -1,12 +1,53 @@
 {
     "CN": {
         "CN_GAME_VERSION": "727.727.727.7272727",
-        "CN_SDK_VERSION": "1.16.0",
+        "CN_SDK_VERSION": "1.20.0",
         "CN_SDK_URL": "https://sdk-api.yostar.cn",
         "CN_SERVER_URL": "https://nova.yostar.cn",
         "CN_SERVER_GARBLE_KEY": "QW*Wi7fKjLk!T82Qf2nEGZA%nSC!D9qV",
         "DEVICE_CN": "9135d47061a9cd0e25ed9e7a0771f848a43e902d",
         "TOKEN_CN": "140909d8e290f81a599f8f0e1bfd29e67a2df691",
         "UID_CN": "1012257613"
+    },
+    "STATUS": {
+        "launcherVersion": "1.6.0",
+        "resourceFetcherRelease": "v0.4.1",
+        "regions": {
+            "CN": {
+                "static": "https://nova-static.yostar.cn",
+                "key": "Xf&FRcsYm48cJ2A@",
+                "launcher": "https://launcher-api.yostar.net",
+                "tag": "StellaSora_CN",
+                "salt": "872550AD59A235662C5B7D5F88CEBE4B"
+            },
+            "EN": {
+                "static": "https://nova-static.stellasora.global",
+                "key": "ma5Dn2FhC*Xhxy%c",
+                "launcher": "https://api-launcher-en.yo-star.com",
+                "tag": "StellaSora_EN",
+                "salt": "DE7108E9B2842FD460F4777702727869"
+            },
+            "JP": {
+                "static": "https://nova-static.stellasora.jp",
+                "key": "ZnUFA@S9%4KyoryM",
+                "launcher": "https://api-launcher-jp.yo-star.com",
+                "tag": "StellaSora_JP",
+                "salt": "DE7108E9B2842FD460F4777702727869"
+            },
+            "KR": {
+                "static": "https://nova-static.stellasora.kr",
+                "key": "U9cjHuwGDDx&$drn",
+                "launcher": "https://api-launcher-kr.yo-star.com",
+                "tag": "StellaSora_KR",
+                "salt": "DE7108E9B2842FD460F4777702727869"
+            },
+            "TW": {
+                "static": "https://nova-static.stargazer-games.com",
+                "key": "owGYVDmfHrxi^4pm",
+                "launcher": "https://api-launcher-tw.stargazer-games.com",
+                "tag": "StellaSora_TW",
+                "salt": "DE7108E9B2842FD460F4777702727869"
+            }
+        }
     }
 }

@@ -27,6 +27,12 @@ jobs:
       with:
         version: 11
 
+    - name: Cache ResourceFetcher
+      uses: actions/cache@v4
+      with:
+        path: Tool/ResourceFetcher
+        key: resource-fetcher-${{ runner.os }}-${{ hashFiles('config.json') }}
+
     - name: Sync
       env:
         DEVICE: ${{ secrets.DEVICE }}

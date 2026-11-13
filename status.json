@@ -1,0 +1,45 @@
+{
+    "updatedAt": "2026-11-13T09:01:50.636Z",
+    "regions": {
+        "CN": {
+            "status": 0,
+            "launcherVersion": "1.6.0",
+            "clientVersion": "2.0.0",
+            "gameVersion": "2.1.0",
+            "patchVersion": 148,
+            "message": ""
+        },
+        "EN": {
+            "status": 0,
+            "launcherVersion": "1.6.0",
+            "clientVersion": "2.0.0",
+            "gameVersion": "2.1.0",
+            "patchVersion": 148,
+            "message": ""
+        },
+        "JP": {
+            "status": 0,
+            "launcherVersion": "1.6.0",
+            "clientVersion": "2.0.0",
+            "gameVersion": "2.1.0",
+            "patchVersion": 151,
+            "message": ""
+        },
+        "KR": {
+            "status": 0,
+            "launcherVersion": "1.6.0",
+            "clientVersion": "2.0.0",
+            "gameVersion": "2.1.0",
+            "patchVersion": 156,
+            "message": ""
+        },
+        "TW": {
+            "status": 0,
+            "launcherVersion": "1.6.0",
+            "clientVersion": "2.0.0",
+            "gameVersion": "2.1.0",
+            "patchVersion": 156,
+            "message": ""
+        }
+    }
+}

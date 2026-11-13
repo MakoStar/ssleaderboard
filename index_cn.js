@@ -4,6 +4,7 @@ const path = require('path');
 const protobuf = require('protobufjs');
 let { BB_SEASON, FE_SEASON } = require('./season.json');
 const { CN: { CN_GAME_VERSION, CN_SDK_VERSION, CN_SDK_URL, CN_SERVER_URL, CN_SERVER_GARBLE_KEY } } = require('./config.json')
+const { syncStatus } = require('./status');
 
 const ENV_FILE = path.join(__dirname, '.env');
 if (fs.existsSync(ENV_FILE)) {
@@ -784,7 +785,14 @@ function moveDataFilesToDirectories(sourceDir, curBBFile, curFEFile) {
 }
 
 (async () => {
-  if (!!!process.env.CI) process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  if (!process.env.CI) process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+  const status = await syncStatus();
+  const cn = status?.regions?.CN;
+  if (cn?.status === 1) {
+    console.log('status: CN server under maintenance, skipping sync -', cn.message);
+    return;
+  }
 
   const [BB_SEASON_NAME, FE_SEASON_NAME] = await getLatestSeason_CN();
 
