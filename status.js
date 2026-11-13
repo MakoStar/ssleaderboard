@@ -9,6 +9,7 @@ const { fetchGameVersions } = require('./manifest');
 
 const STATUS_FILE = path.join(__dirname, 'status.json');
 const MD_FILE = path.join(__dirname, 'STATUS.md');
+const README_FILE = path.join(__dirname, 'README.md');
 
 const root = new protobuf.Root();
 protobuf.parse(`
@@ -206,6 +207,24 @@ function renderMarkdown(data) {
   return lines.join('\n');
 }
 
+function updateReadme(statusMd) {
+  const START = '<!-- STATUS:START -->';
+  const END = '<!-- STATUS:END -->';
+  const block = `${START}\n${statusMd}\n${END}`;
+  if (fs.existsSync(README_FILE)) {
+    const base = fs.readFileSync(README_FILE, 'utf8');
+    if (base.includes(START) && base.includes(END)) {
+      const next = base.replace(new RegExp(`${START}[\\s\\S]*?${END}`), block);
+      if (next !== base) fs.writeFileSync(README_FILE, next, 'utf8');
+      return;
+    }
+    fs.writeFileSync(README_FILE, `${base.replace(/\s+$/, '')}\n\n${block}\n`, 'utf8');
+    return;
+  }
+  const template = `# ss-leaderboard\n\nStellaSora 多区服服务器状态看板（CN / EN / JP / KR / TW），由 CI 每 5 分钟自动抓取更新。\n\n${block}\n`;
+  fs.writeFileSync(README_FILE, template, 'utf8');
+}
+
 function sameRegion(a, b) {
   return !!a && !!b
     && a.status === b.status
@@ -277,12 +296,15 @@ async function syncStatus() {
     if (!fs.existsSync(MD_FILE) || fs.readFileSync(MD_FILE, 'utf8') !== md) {
       fs.writeFileSync(MD_FILE, md, 'utf8');
     }
+    updateReadme(md);
     return current;
   }
 
   const next = { updatedAt: new Date().toISOString(), regions: nextRegions };
+  const md = renderMarkdown(next);
   fs.writeFileSync(STATUS_FILE, JSON.stringify(next, null, 4) + '\n', 'utf8');
-  fs.writeFileSync(MD_FILE, renderMarkdown(next), 'utf8');
+  fs.writeFileSync(MD_FILE, md, 'utf8');
+  updateReadme(md);
   console.log('status: wrote status.json',
     Object.entries(nextRegions)
       .map(([r, d]) => `${r}=${d.patchVersion}/${d.status}`)
