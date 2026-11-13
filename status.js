@@ -221,8 +221,7 @@ function updateReadme(statusMd) {
     fs.writeFileSync(README_FILE, `${base.replace(/\s+$/, '')}\n\n${block}\n`, 'utf8');
     return;
   }
-  const template = `# ss-leaderboard\n\nStellaSora 多区服服务器状态看板（CN / EN / JP / KR / TW），由 CI 每 5 分钟自动抓取更新。\n\n${block}\n`;
-  fs.writeFileSync(README_FILE, template, 'utf8');
+  fs.writeFileSync(README_FILE, `${block}\n`, 'utf8');
 }
 
 function sameRegion(a, b) {

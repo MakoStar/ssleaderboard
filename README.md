@@ -1,7 +1,3 @@
-# ss-leaderboard
-
-StellaSora 多区服服务器状态看板（CN / EN / JP / KR / TW），由 CI 每 5 分钟自动抓取更新。
-
 <!-- STATUS:START -->
 <div align="center">
 
