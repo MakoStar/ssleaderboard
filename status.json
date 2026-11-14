@@ -1,12 +1,12 @@
 {
-    "updatedAt": "2026-11-14T13:01:09.440Z",
+    "updatedAt": "2026-11-14T13:11:01.896Z",
     "regions": {
         "CN": {
             "status": 0,
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
             "gameVersion": "2.1.0",
-            "patchVersion": 148,
+            "patchVersion": 149,
             "message": ""
         },
         "EN": {
@@ -14,7 +14,7 @@
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
             "gameVersion": "2.1.0",
-            "patchVersion": 148,
+            "patchVersion": 149,
             "message": ""
         },
         "JP": {
