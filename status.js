@@ -253,16 +253,16 @@ function updateReadme(statusMd) {
   fs.writeFileSync(README_FILE, `${block}\n`, 'utf8');
 }
 
-function sameRegion(a, b) {
-  return !!a && !!b
-    && a.status === b.status
-    && a.clientVersion === b.clientVersion
-    && a.launcherVersion === b.launcherVersion
-    && a.patchVersion === b.patchVersion
-    && a.gameVersion === b.gameVersion
-    && a.hotfixVersion === b.hotfixVersion
-    && a.message === b.message;
-}
+// function sameRegion(a, b) {
+//   return !!a && !!b
+//     && a.status === b.status
+//     && a.clientVersion === b.clientVersion
+//     && a.launcherVersion === b.launcherVersion
+//     && a.patchVersion === b.patchVersion
+//     && a.gameVersion === b.gameVersion
+//     && a.hotfixVersion === b.hotfixVersion
+//     && a.message === b.message;
+// }
 
 async function fetchRegion(region, cfg, previous, manifest) {
   let launcherVersion = previous?.launcherVersion ?? null;
@@ -312,11 +312,11 @@ async function syncStatus() {
   );
 
   const nextRegions = {};
-  let changed = false;
+  // let changed = false;
   for (const [region, data] of entries) {
     if (!data) continue;
     nextRegions[region] = data;
-    if (!sameRegion(old[region], data)) changed = true;
+    // if (!sameRegion(old[region], data)) changed = true;
   }
 
   if (Object.keys(nextRegions).length === 0) {
@@ -325,15 +325,16 @@ async function syncStatus() {
     return previous;
   }
 
-  const unchanged = !changed
-    && typeof previous.updatedAt === 'string'
-    && Object.keys(old).length === Object.keys(nextRegions).length;
-  const current = unchanged
-    ? { updatedAt: previous.updatedAt, regions: nextRegions }
-    : { updatedAt: new Date().toISOString(), regions: nextRegions };
+  // const unchanged = !changed
+  //   && typeof previous.updatedAt === 'string'
+  //   && Object.keys(old).length === Object.keys(nextRegions).length;
+  // const current = unchanged
+  //   ? { updatedAt: previous.updatedAt, regions: nextRegions }
+  //   : { updatedAt: new Date().toISOString(), regions: nextRegions };
+  const current = { updatedAt: new Date().toISOString(), regions: nextRegions };
 
-  writeOutputs(current, !unchanged);
-  if (!unchanged) console.log('status: wrote status.json',
+  writeOutputs(current);
+  console.log('status: wrote status.json',
     Object.entries(nextRegions)
       .map(([r, d]) => `${r}=${d.patchVersion}/${d.status}`)
       .join(' '));
