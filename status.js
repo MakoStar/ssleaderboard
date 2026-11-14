@@ -4,8 +4,8 @@ const path = require('path');
 const zlib = require('zlib');
 const protobuf = require('protobufjs');
 
-const { launcherVersion, regions } = require('./config.json').STATUS;
-const { fetchGameVersions } = require('./manifest');
+const { regions } = require('./config.json').STATUS;
+const { fetchManifestVersions } = require('./manifest');
 
 const STATUS_FILE = path.join(__dirname, 'status.json');
 const MD_FILE = path.join(__dirname, 'STATUS.md');
@@ -76,11 +76,22 @@ async function fetchServerList(cfg) {
   });
 }
 
-function launcherAuth(cfg) {
+async function fetchLauncherVersion(cfg) {
+  const res = await fetch(`${cfg.pkg}/${cfg.tag}/latest.yml`, {
+    headers: { 'Cache-Control': 'no-cache' },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) throw new Error(`latest.yml HTTP ${res.status}`);
+  const version = (await res.text()).match(/^version:[ \t]*(.+)$/m)?.[1].trim();
+  if (!version) throw new Error('latest.yml missing version');
+  return version.replace(/^["']|["']$/g, '');
+}
+
+function launcherAuth(cfg, version) {
   const head = {
     game_tag: cfg.tag,
     time: Math.floor(Date.now() / 1000),
-    version: launcherVersion,
+    version,
   };
   const sign = crypto.createHash('md5')
     .update(JSON.stringify(head) + cfg.salt)
@@ -88,9 +99,9 @@ function launcherAuth(cfg) {
   return JSON.stringify({ head, sign });
 }
 
-async function fetchClientVersion(cfg) {
+async function fetchClientVersion(cfg, launcherVersion) {
   const res = await fetch(`${cfg.launcher}/api/launcher/game/config`, {
-    headers: { Authorization: launcherAuth(cfg), 'User-Agent': 'Mozilla/5.0' },
+    headers: { Authorization: launcherAuth(cfg, launcherVersion), 'User-Agent': 'Mozilla/5.0' },
     signal: AbortSignal.timeout(15000),
   });
   if (!res.ok) throw new Error(`launcher HTTP ${res.status}`);
@@ -157,13 +168,14 @@ function renderMarkdown(data) {
     '<table align="center">',
     '  <thead>',
     '    <tr>',
-    ...['Region', 'Status', 'Game', 'Patch']
-      .map(h => `      <th align="${h === 'Status' ? 'left' : 'center'}">${h}</th>`),
+    ...['Region', 'Status', 'Launcher', 'Client', 'Game', 'Patch', 'Hotfix']
+      .map(h => `      <th align="center">${h}</th>`),
     '    </tr>',
     '  </thead>',
     '  <tbody>',
   ];
 
+  const prefixed = (prefix, value) => `<td><code>${value == null || value === '' ? '-' : `${prefix}${value}`}</code></td>`;
   for (const [region, d] of rows) {
     const lang = REGION_LANG[region] ?? { maintained: 'Maintenance', running: 'Online' };
     const dot = d.status === 1 ? STATUS_DOT.down : STATUS_DOT.up;
@@ -171,8 +183,11 @@ function renderMarkdown(data) {
       '    <tr align="center">',
       `      <td><b>${region}</b></td>`,
       `      <td align="left"><img src="${dot}" width="16" height="16" alt="●" /> ${d.status === 1 ? lang.maintained : lang.running}</td>`,
-      `      <td><code>${d.gameVersion ?? '-'}</code></td>`,
-      `      <td><code>${d.patchVersion ?? '-'}</code></td>`,
+      `      ${prefixed('v', d.launcherVersion)}`,
+      `      ${prefixed('v', d.clientVersion)}`,
+      `      ${prefixed('v', d.gameVersion)}`,
+      `      ${prefixed('v', d.patchVersion)}`,
+      `      ${prefixed('p', d.hotfixVersion)}`,
       '    </tr>',
     );
   }
@@ -207,6 +222,20 @@ function renderMarkdown(data) {
   return lines.join('\n');
 }
 
+const norm = s => s.replace(/\r\n/g, '\n');
+
+function writeIfChanged(file, content) {
+  if (fs.existsSync(file) && norm(fs.readFileSync(file, 'utf8')) === norm(content)) return;
+  fs.writeFileSync(file, content, 'utf8');
+}
+
+function writeOutputs(data, writeJson = true) {
+  const md = renderMarkdown(data);
+  if (writeJson) writeIfChanged(STATUS_FILE, JSON.stringify(data, null, 4) + '\n');
+  writeIfChanged(MD_FILE, md);
+  updateReadme(md);
+}
+
 function updateReadme(statusMd) {
   const START = '<!-- STATUS:START -->';
   const END = '<!-- STATUS:END -->';
@@ -215,7 +244,7 @@ function updateReadme(statusMd) {
     const base = fs.readFileSync(README_FILE, 'utf8');
     if (base.includes(START) && base.includes(END)) {
       const next = base.replace(new RegExp(`${START}[\\s\\S]*?${END}`), block);
-      if (next !== base) fs.writeFileSync(README_FILE, next, 'utf8');
+      if (norm(next) !== norm(base)) fs.writeFileSync(README_FILE, next, 'utf8');
       return;
     }
     fs.writeFileSync(README_FILE, `${base.replace(/\s+$/, '')}\n\n${block}\n`, 'utf8');
@@ -231,17 +260,25 @@ function sameRegion(a, b) {
     && a.launcherVersion === b.launcherVersion
     && a.patchVersion === b.patchVersion
     && a.gameVersion === b.gameVersion
+    && a.hotfixVersion === b.hotfixVersion
     && a.message === b.message;
 }
 
-async function fetchRegion(region, cfg, previous, gameVersion) {
+async function fetchRegion(region, cfg, previous, manifest) {
+  let launcherVersion = previous?.launcherVersion ?? null;
+  try {
+    launcherVersion = await fetchLauncherVersion(cfg);
+  } catch (err) {
+    console.warn(`status: ${region} launcher version unavailable -`, err.message);
+  }
+
   const [client, server] = await Promise.allSettled([
-    fetchClientVersion(cfg),
+    launcherVersion ? fetchClientVersion(cfg, launcherVersion) : Promise.reject(new Error('no launcher version')),
     fetchServerList(cfg),
   ]);
   if (server.status === 'rejected') throw server.reason;
   if (client.status === 'rejected') {
-    console.warn(`status: ${region} launcher version unavailable -`, client.reason.message);
+    console.warn(`status: ${region} client version unavailable -`, client.reason.message);
   }
   const s = server.value;
   return {
@@ -250,8 +287,9 @@ async function fetchRegion(region, cfg, previous, gameVersion) {
     clientVersion: client.status === 'fulfilled'
       ? client.value
       : previous?.clientVersion ?? null,
-    gameVersion: gameVersion ?? previous?.gameVersion ?? null,
+    gameVersion: manifest?.gameVersion ?? previous?.gameVersion ?? null,
     patchVersion: Number(s.version),
+    hotfixVersion: manifest?.hotfixVersion ?? previous?.hotfixVersion ?? null,
     message: s.message ?? '',
   };
 }
@@ -260,12 +298,12 @@ async function syncStatus() {
   const previous = readStatus();
   const old = previous.regions ?? {};
 
-  const gameVersions = await fetchGameVersions(Object.keys(regions));
+  const manifests = await fetchManifestVersions(Object.keys(regions));
 
   const entries = await Promise.all(
     Object.entries(regions).map(async ([region, cfg]) => {
       try {
-        return [region, await fetchRegion(region, cfg, old[region], gameVersions[region])];
+        return [region, await fetchRegion(region, cfg, old[region], manifests[region])];
       } catch (err) {
         console.warn(`status: ${region} sync failed, keeping previous -`, err.message);
         return [region, old[region] ?? null];
@@ -283,32 +321,23 @@ async function syncStatus() {
 
   if (Object.keys(nextRegions).length === 0) {
     console.warn('status: all regions failed, keeping previous status.json');
+    if (Object.keys(old).length > 0) writeOutputs(previous, false);
     return previous;
   }
 
   const unchanged = !changed
     && typeof previous.updatedAt === 'string'
     && Object.keys(old).length === Object.keys(nextRegions).length;
-  if (unchanged) {
-    const current = { updatedAt: previous.updatedAt, regions: nextRegions };
-    const md = renderMarkdown(current);
-    if (!fs.existsSync(MD_FILE) || fs.readFileSync(MD_FILE, 'utf8') !== md) {
-      fs.writeFileSync(MD_FILE, md, 'utf8');
-    }
-    updateReadme(md);
-    return current;
-  }
+  const current = unchanged
+    ? { updatedAt: previous.updatedAt, regions: nextRegions }
+    : { updatedAt: new Date().toISOString(), regions: nextRegions };
 
-  const next = { updatedAt: new Date().toISOString(), regions: nextRegions };
-  const md = renderMarkdown(next);
-  fs.writeFileSync(STATUS_FILE, JSON.stringify(next, null, 4) + '\n', 'utf8');
-  fs.writeFileSync(MD_FILE, md, 'utf8');
-  updateReadme(md);
-  console.log('status: wrote status.json',
+  writeOutputs(current, !unchanged);
+  if (!unchanged) console.log('status: wrote status.json',
     Object.entries(nextRegions)
       .map(([r, d]) => `${r}=${d.patchVersion}/${d.status}`)
       .join(' '));
-  return next;
+  return current;
 }
 
 module.exports = { syncStatus };

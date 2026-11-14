@@ -10,13 +10,13 @@
         "UID_CN": "1012257613"
     },
     "STATUS": {
-        "launcherVersion": "1.6.0",
         "resourceFetcherRelease": "v0.4.1",
         "regions": {
             "CN": {
                 "static": "https://nova-static.yostar.cn",
                 "key": "Xf&FRcsYm48cJ2A@",
                 "launcher": "https://launcher-api.yostar.net",
+                "pkg": "https://game-launcher-ss-cn.yostar.net/pubplat/game-launcher-cn/install_pkg/launcher",
                 "tag": "StellaSora_CN",
                 "salt": "872550AD59A235662C5B7D5F88CEBE4B"
             },
@@ -24,6 +24,7 @@
                 "static": "https://nova-static.stellasora.global",
                 "key": "ma5Dn2FhC*Xhxy%c",
                 "launcher": "https://api-launcher-en.yo-star.com",
+                "pkg": "https://launcher-pkg-ss-en.yo-star.com/install_pkg/game_launcher",
                 "tag": "StellaSora_EN",
                 "salt": "DE7108E9B2842FD460F4777702727869"
             },
@@ -31,6 +32,7 @@
                 "static": "https://nova-static.stellasora.jp",
                 "key": "ZnUFA@S9%4KyoryM",
                 "launcher": "https://api-launcher-jp.yo-star.com",
+                "pkg": "https://launcher-pkg-ss-jp.yo-star.com/install_pkg/game_launcher",
                 "tag": "StellaSora_JP",
                 "salt": "DE7108E9B2842FD460F4777702727869"
             },
@@ -38,6 +40,7 @@
                 "static": "https://nova-static.stellasora.kr",
                 "key": "U9cjHuwGDDx&$drn",
                 "launcher": "https://api-launcher-kr.yo-star.com",
+                "pkg": "https://launcher-pkg-ss-kr.yo-star.com/install_pkg/game_launcher",
                 "tag": "StellaSora_KR",
                 "salt": "DE7108E9B2842FD460F4777702727869"
             },
@@ -45,6 +48,7 @@
                 "static": "https://nova-static.stargazer-games.com",
                 "key": "owGYVDmfHrxi^4pm",
                 "launcher": "https://api-launcher-tw.stargazer-games.com",
+                "pkg": "https://launcher-pkg-ss-hk.stargazer-games.com/install_pkg/game_launcher",
                 "tag": "StellaSora_TW",
                 "salt": "DE7108E9B2842FD460F4777702727869"
             }

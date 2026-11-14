@@ -63,13 +63,17 @@ function buildArgs(region) {
   ];
 }
 
-function readGameVersion(cwd, region) {
+function readManifest(cwd, region) {
   const mani = path.join(cwd, 'output', 'Metadata', region, 'win', 'ss_win.mani');
-  const match = fs.readFileSync(mani, 'utf8').match(/^\$GAME_VER:(.+)$/m);
-  return match ? match[1].trim() : null;
+  const text = fs.readFileSync(mani, 'utf8');
+  const hotfix = text.match(/^\$BIN_DIFF_PATCH_VER:(\d+)$/m)?.[1];
+  return {
+    gameVersion: text.match(/^\$GAME_VER:(.+)$/m)?.[1].trim() ?? null,
+    hotfixVersion: hotfix == null ? null : Number(hotfix),
+  };
 }
 
-async function fetchGameVersions(regions) {
+async function fetchManifestVersions(regions) {
   const versions = {};
   let bin;
   try {
@@ -89,7 +93,7 @@ async function fetchGameVersions(regions) {
         stdio: 'pipe',
         timeout: 120000,
       });
-      versions[region] = readGameVersion(cwd, region);
+      versions[region] = readManifest(cwd, region);
     } catch (err) {
       console.warn(`manifest: ${region} failed -`, err.message.slice(0, 200));
     }
@@ -97,14 +101,14 @@ async function fetchGameVersions(regions) {
   return versions;
 }
 
-module.exports = { buildArgs, fetchGameVersions, readGameVersion };
+module.exports = { buildArgs, fetchManifestVersions, readManifest };
 
 if (require.main === module) {
   if (process.argv.includes('--args')) {
     console.log(JSON.stringify(buildArgs(process.env.REGION || 'CN'), null, 2));
   } else {
     const regions = process.argv.slice(2);
-    fetchGameVersions(regions.length ? regions : Object.keys(require('./config.json').STATUS.regions))
+    fetchManifestVersions(regions.length ? regions : Object.keys(require('./config.json').STATUS.regions))
       .then(v => console.log(JSON.stringify(v, null, 2)));
   }
 }

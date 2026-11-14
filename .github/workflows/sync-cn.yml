@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -43,7 +47,7 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         pnpm install
-        node index_cn.js
+        node index_cn.js || echo "::warning::leaderboard sync failed; status files will still be committed"
         git add .
         if ! git diff --cached --quiet; then
           git commit -m "sync"
