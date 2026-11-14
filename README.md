@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/game-2.1.0-blueviolet?style=flat-square" alt="game" />
 </p>
 
-<sub>Last updated · 2026-11-13T09:01:50.636Z (UTC)</sub>
+<sub>Last updated · 2026-11-14T13:01:09.440Z (UTC)</sub>
 
 </div>
 
@@ -39,19 +39,19 @@
       <td><b>JP</b></td>
       <td align="left"><img src="https://github.githubassets.com/images/icons/emoji/unicode/1f7e2.png" width="16" height="16" alt="●" /> 稼働中</td>
       <td><code>2.1.0</code></td>
-      <td><code>151</code></td>
+      <td><code>152</code></td>
     </tr>
     <tr align="center">
       <td><b>KR</b></td>
       <td align="left"><img src="https://github.githubassets.com/images/icons/emoji/unicode/1f7e2.png" width="16" height="16" alt="●" /> 정상 운영</td>
       <td><code>2.1.0</code></td>
-      <td><code>156</code></td>
+      <td><code>157</code></td>
     </tr>
     <tr align="center">
       <td><b>TW</b></td>
       <td align="left"><img src="https://github.githubassets.com/images/icons/emoji/unicode/1f7e2.png" width="16" height="16" alt="●" /> 運作中</td>
       <td><code>2.1.0</code></td>
-      <td><code>156</code></td>
+      <td><code>157</code></td>
     </tr>
   </tbody>
 </table>

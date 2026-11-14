@@ -1,5 +1,5 @@
 {
-    "updatedAt": "2026-11-13T09:01:50.636Z",
+    "updatedAt": "2026-11-14T13:01:09.440Z",
     "regions": {
         "CN": {
             "status": 0,
@@ -22,7 +22,7 @@
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
             "gameVersion": "2.1.0",
-            "patchVersion": 151,
+            "patchVersion": 152,
             "message": ""
         },
         "KR": {
@@ -30,7 +30,7 @@
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
             "gameVersion": "2.1.0",
-            "patchVersion": 156,
+            "patchVersion": 157,
             "message": ""
         },
         "TW": {
@@ -38,7 +38,7 @@
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
             "gameVersion": "2.1.0",
-            "patchVersion": 156,
+            "patchVersion": 157,
             "message": ""
         }
     }
