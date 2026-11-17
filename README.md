@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/game-2.1.0-blueviolet?style=flat-square" alt="game" />
 </p>
 
-<sub>Last updated · 2026-11-17T03:01:53.375Z (UTC)</sub>
+<sub>Last updated · 2026-11-17T03:10:49.889Z (UTC)</sub>
 
 </div>
 
@@ -59,8 +59,8 @@
       <td><code>v1.6.0</code></td>
       <td><code>v2.0.0</code></td>
       <td><code>v2.1.0</code></td>
-      <td><code>v157</code></td>
-      <td><code>p10</code></td>
+      <td><code>v158</code></td>
+      <td><code>p11</code></td>
     </tr>
     <tr align="center">
       <td><b>TW</b></td>
