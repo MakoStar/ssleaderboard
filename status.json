@@ -1,5 +1,5 @@
 {
-    "updatedAt": "2026-11-23T05:21:30.357Z",
+    "updatedAt": "2026-11-23T05:31:00.744Z",
     "regions": {
         "CN": {
             "status": 0,
@@ -15,7 +15,7 @@
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
             "gameVersion": "2.1.0",
-            "patchVersion": 149,
+            "patchVersion": 150,
             "hotfixVersion": 8,
             "message": "Servers are currently undergoing maintenance, which is expected to be completed by Nov. 23, 2026 03:00 (UTC-7). For the latest updates, please check our social media channels."
         },
