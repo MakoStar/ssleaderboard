@@ -1,5 +1,5 @@
 {
-    "updatedAt": "2026-11-25T03:20:55.330Z",
+    "updatedAt": "2026-11-25T03:31:40.709Z",
     "regions": {
         "CN": {
             "status": 0,
@@ -33,7 +33,7 @@
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
             "gameVersion": "2.1.0",
-            "patchVersion": 158,
+            "patchVersion": 159,
             "hotfixVersion": 11,
             "message": "[서버 점검 진행 중] 현재 서버 점검이 진행 중입니다. 점검 시간: 금일 10:00 ~ 17:00 서비스 이용에 불편을 드려 진심으로 죄송합니다."
         },
