@@ -1,13 +1,13 @@
 {
-    "updatedAt": "2026-11-27T03:01:06.961Z",
+    "updatedAt": "2026-11-27T03:11:01.528Z",
     "regions": {
         "CN": {
             "status": 0,
             "launcherVersion": "1.3.0",
             "clientVersion": "2.0.0",
-            "gameVersion": "2.1.0",
+            "gameVersion": "2.1.1",
             "patchVersion": 151,
-            "hotfixVersion": 9,
+            "hotfixVersion": 11,
             "message": ""
         },
         "EN": {
@@ -23,27 +23,27 @@
             "status": 0,
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
-            "gameVersion": "2.1.0",
-            "patchVersion": 152,
-            "hotfixVersion": 9,
+            "gameVersion": "2.1.1",
+            "patchVersion": 153,
+            "hotfixVersion": 10,
             "message": ""
         },
         "KR": {
             "status": 0,
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
-            "gameVersion": "2.1.0",
-            "patchVersion": 159,
-            "hotfixVersion": 11,
+            "gameVersion": "2.1.1",
+            "patchVersion": 160,
+            "hotfixVersion": 12,
             "message": ""
         },
         "TW": {
             "status": 0,
             "launcherVersion": "1.8.2",
             "clientVersion": "2.0.0",
-            "gameVersion": "2.1.0",
-            "patchVersion": 157,
-            "hotfixVersion": 8,
+            "gameVersion": "2.1.1",
+            "patchVersion": 158,
+            "hotfixVersion": 9,
             "message": ""
         }
     }
