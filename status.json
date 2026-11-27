@@ -1,12 +1,12 @@
 {
-    "updatedAt": "2026-11-27T02:58:33.378Z",
+    "updatedAt": "2026-11-27T03:01:06.961Z",
     "regions": {
         "CN": {
             "status": 0,
             "launcherVersion": "1.3.0",
             "clientVersion": "2.0.0",
             "gameVersion": "2.1.0",
-            "patchVersion": 149,
+            "patchVersion": 151,
             "hotfixVersion": 9,
             "message": ""
         },
@@ -14,9 +14,9 @@
             "status": 0,
             "launcherVersion": "1.6.0",
             "clientVersion": "2.0.0",
-            "gameVersion": "2.1.0",
-            "patchVersion": 150,
-            "hotfixVersion": 8,
+            "gameVersion": "2.1.1",
+            "patchVersion": 151,
+            "hotfixVersion": 9,
             "message": ""
         },
         "JP": {

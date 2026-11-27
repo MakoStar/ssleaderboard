@@ -5,10 +5,10 @@
 <p>
   <img src="https://img.shields.io/badge/regions-5-blue?style=flat-square" alt="regions" />
   <img src="https://img.shields.io/badge/maintenance-0-brightgreen?style=flat-square" alt="maintenance" />
-  <img src="https://img.shields.io/badge/game-2.1.0-blueviolet?style=flat-square" alt="game" />
+  <img src="https://img.shields.io/badge/game-mixed-blueviolet?style=flat-square" alt="game" />
 </p>
 
-<sub>Last updated · 2026-11-27T02:58:33.378Z (UTC)</sub>
+<sub>Last updated · 2026-11-27T03:01:06.961Z (UTC)</sub>
 
 </div>
 
@@ -31,7 +31,7 @@
       <td><code>v1.3.0</code></td>
       <td><code>v2.0.0</code></td>
       <td><code>v2.1.0</code></td>
-      <td><code>v149</code></td>
+      <td><code>v151</code></td>
       <td><code>p9</code></td>
     </tr>
     <tr align="center">
@@ -39,9 +39,9 @@
       <td align="left"><img src="https://github.githubassets.com/images/icons/emoji/unicode/1f7e2.png" width="16" height="16" alt="●" /> Online</td>
       <td><code>v1.6.0</code></td>
       <td><code>v2.0.0</code></td>
-      <td><code>v2.1.0</code></td>
-      <td><code>v150</code></td>
-      <td><code>p8</code></td>
+      <td><code>v2.1.1</code></td>
+      <td><code>v151</code></td>
+      <td><code>p9</code></td>
     </tr>
     <tr align="center">
       <td><b>JP</b></td>
